@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registro de Atividades — COBIB</title>
+<meta name="description" content="Registro diário de processos de trabalho e atividades por unidade e servidor, com aprovação pela chefia.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#22352C">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{
+  --tinta:#22352C; --papel:#F5F6F2; --ficha:#FFFFFF;
+  --verde:#2F5D4A; --verde-suave:#E4EEE8;
+  --dourado:#A8852F; --dourado-suave:#F2ECDD;
+  --grafite:#5C6660; --linha:#D6DBD5; --erro:#9C3B31;
+  --raio:6px;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--papel); color:var(--tinta);
+  font-family:var(--sans); font-size:15px; line-height:1.5}
+.wrap{max-width:1020px; margin:0 auto; padding:0 20px 64px}
+
+header{border-bottom:3px double var(--tinta); padding:28px 0 16px; margin-bottom:28px}
+header .eyebrow{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--grafite); margin:0 0 6px}
+header h1{font-family:var(--serif); font-weight:600; font-size:clamp(24px,4vw,32px); margin:0; line-height:1.15}
+header .sub{margin:6px 0 0; color:var(--grafite); font-size:13px}
+.pill{display:inline-block; background:var(--verde-suave); color:var(--verde);
+  border-radius:999px; padding:1px 10px; font-weight:600; margin-left:6px}
+.pill.chefia{background:var(--dourado-suave); color:var(--dourado)}
+
+.card{background:var(--ficha); border:1px solid var(--linha); border-radius:var(--raio);
+  border-left:4px solid var(--dourado); padding:22px; margin-bottom:22px}
+.card h2{font-family:var(--serif); font-size:18px; font-weight:600; margin:0 0 4px}
+.card .hint{margin:0 0 16px; color:var(--grafite); font-size:13px}
+
+label{display:block; font-weight:600; font-size:13px; margin:0 0 4px}
+select,input[type=date],input[type=text],textarea{
+  width:100%; padding:9px 10px; font:inherit; color:var(--tinta);
+  background:#fff; border:1px solid var(--linha); border-radius:var(--raio)}
+select:focus,input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--verde); outline-offset:1px}
+textarea{resize:vertical; min-height:64px}
+.grid{display:grid; gap:14px}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:720px){.grid.c2,.grid.c3{grid-template-columns:1fr}}
+.campo{margin-bottom:14px}
+
+.chips{display:flex; gap:10px; flex-wrap:wrap}
+.chip{border:1.5px solid var(--linha); background:#fff; border-radius:var(--raio);
+  padding:8px 14px; font:inherit; cursor:pointer; color:var(--grafite);
+  display:flex; flex-direction:column; align-items:center; min-width:88px;
+  transition:border-color .12s, background .12s}
+.chip b{font-size:18px; font-family:var(--serif)}
+.chip small{font-size:11px; letter-spacing:.08em; text-transform:uppercase}
+.chip[aria-pressed=true]{border-color:var(--verde); background:var(--verde-suave); color:var(--verde)}
+.chip:disabled{opacity:.35; cursor:not-allowed}
+
+.acao{background:var(--verde); color:#fff; border:0; border-radius:var(--raio);
+  padding:11px 22px; font:inherit; font-weight:600; cursor:pointer}
+.acao:hover{background:#264b3c}
+.acao.sec{background:#fff; color:var(--verde); border:1.5px solid var(--verde)}
+.acao.sec:hover{background:var(--verde-suave)}
+.acao.mini{padding:6px 12px; font-size:13px; font-weight:500}
+.acao:disabled{opacity:.5; cursor:not-allowed}
+
+.aviso{background:var(--verde-suave); border-radius:var(--raio); color:var(--verde);
+  padding:10px 14px; font-size:13px; margin-top:12px; display:none}
+.aviso.erro{background:#F6E7E4; color:var(--erro)}
+
+/* Estado da conexão com a pasta */
+.conexao{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+.led{width:10px; height:10px; border-radius:50%; background:var(--erro); flex:none}
+.led.ok{background:var(--verde)}
+#txtConexao{font-size:13px; color:var(--grafite)}
+
+.totais{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px}
+@media(max-width:640px){.totais{grid-template-columns:1fr}}
+.total{background:var(--tinta); color:var(--papel); border-radius:var(--raio); padding:16px 20px}
+.total small{display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; opacity:.75}
+.total b{font-family:var(--serif); font-size:30px; font-weight:600}
+
+.filtros{display:flex; gap:12px; align-items:end; flex-wrap:wrap; margin-bottom:14px}
+.filtros .campo{margin:0; min-width:150px}
+.filtros input[type=month]{padding:8px 10px; font:inherit; border:1px solid var(--linha);
+  border-radius:var(--raio); background:#fff; width:100%}
+table{width:100%; border-collapse:collapse; font-size:13.5px}
+th{text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--grafite); border-bottom:2px solid var(--tinta); padding:8px 8px}
+td{border-bottom:1px solid var(--linha); padding:9px 8px; vertical-align:top}
+td.num,th.num{text-align:right; font-variant-numeric:tabular-nums}
+tr.subtotal td{background:var(--verde-suave); color:var(--verde); font-weight:600}
+.atv{max-width:340px}
+.excluir{background:none; border:0; color:var(--erro); cursor:pointer; font-size:13px; padding:2px}
+.vazio{color:var(--grafite); text-align:center; padding:28px 0}
+.export{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+.tag-abono{background:var(--dourado-suave); color:var(--dourado); border-radius:999px;
+  padding:0 8px; font-size:11px; font-weight:600}
+.st{border-radius:999px; padding:1px 10px; font-size:11px; font-weight:600; white-space:nowrap}
+.st.ap{background:var(--verde-suave); color:var(--verde)}
+.st.pe{background:var(--dourado-suave); color:var(--dourado)}
+
+/* Resumo por servidor (visões de chefia) */
+.resumo{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px}
+.resumo .srv{background:var(--papel); border:1px solid var(--linha); border-radius:var(--raio);
+  padding:8px 14px; font-size:13px}
+.resumo .srv b{font-family:var(--serif); font-size:16px}
+.resumo .srv small{color:var(--grafite)}
+
+@media(max-width:760px){.esconde-m{display:none}.atv{max-width:none}}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">COBIB · Registro diário de produção</p>
+  <h1>Registro de Atividades</h1>
+  <p class="sub" id="idAtual">Ninguém identificado</p>
+</header>
+
+<!-- ETAPA 1 — Identificação -->
+<section class="card" id="cardIdent">
+  <h2>1 · Identificação</h2>
+  <p class="hint">Escolha o perfil de acesso. Servidores registram atividades; a chefia da unidade aprova; a chefia geral acompanha todas as unidades.</p>
+  <div class="grid c3">
+    <div class="campo">
+      <label for="selPerfil">Perfil</label>
+      <select id="selPerfil">
+        <option value="servidor">Servidor</option>
+        <option value="chefia">Chefia da unidade</option>
+        <option value="geral">Chefia geral (visualização)</option>
+      </select>
+    </div>
+    <div class="campo" id="cUnidade">
+      <label for="selUnidade">Unidade de trabalho</label>
+      <select id="selUnidade"></select>
+    </div>
+    <div class="campo" id="cServidor">
+      <label for="selServidor">Servidor</label>
+      <select id="selServidor"></select>
+    </div>
+    <div class="campo" id="cNomeChefe" hidden>
+      <label for="inpNomeChefe">Nome da chefia</label>
+      <input type="text" id="inpNomeChefe" placeholder="Registrado ao aprovar lançamentos" autocomplete="name">
+    </div>
+  </div>
+  <button class="acao" id="btnIniciar">Continuar</button>
+  <div class="aviso" id="avisoIdent" role="alert"></div>
+</section>
+
+<!-- ETAPA 2 — Pasta da rede -->
+<section class="card" id="cardPasta" hidden>
+  <h2>2 · Pasta da rede</h2>
+  <p class="hint">Conecte a pasta central <b>\\COBIB\AmbienteTrabalho\unidadeCentral</b>. A permissão fica memorizada; nas próximas sessões basta reconfirmar com um clique.</p>
+  <div class="conexao">
+    <span class="led" id="led"></span>
+    <span id="txtConexao">Pasta não conectada</span>
+    <button class="acao sec mini" id="btnPasta">Conectar pasta</button>
+    <button class="acao sec mini" id="btnAtualizar" hidden>Atualizar dados da rede</button>
+  </div>
+  <div class="aviso" id="avisoPasta" role="alert"></div>
+</section>
+
+<!-- ETAPA 3 — Lançamento (perfil servidor) -->
+<section class="card" id="cardForm" hidden>
+  <h2>3 · Novo lançamento</h2>
+  <p class="hint">Registre a atividade realizada. A pontuação é definida pela complexidade; a aprovação é feita pela chefia da unidade.</p>
+
+  <div class="grid c2">
+    <div class="campo">
+      <label for="inpData">Data</label>
+      <input type="date" id="inpData">
+    </div>
+    <div class="campo">
+      <label style="margin-bottom:10px">Abono</label>
+      <label style="font-weight:400; display:flex; gap:8px; align-items:center">
+        <input type="checkbox" id="chkAbono"> Lançamento referente a abono
+      </label>
+    </div>
+  </div>
+
+  <div class="campo">
+    <label for="selProcesso">Processo de trabalho</label>
+    <select id="selProcesso"></select>
+  </div>
+  <div class="campo">
+    <label for="selAtividade">Atividade</label>
+    <select id="selAtividade"></select>
+  </div>
+  <div class="campo">
+    <label>Complexidade e pontuação</label>
+    <div class="chips" id="chips" role="group" aria-label="Complexidade">
+      <button type="button" class="chip" data-c="b" aria-pressed="false"><b>5</b><small>Baixa</small></button>
+      <button type="button" class="chip" data-c="m" aria-pressed="false"><b>10</b><small>Média</small></button>
+      <button type="button" class="chip" data-c="a" aria-pressed="false"><b>15</b><small>Alta</small></button>
+    </div>
+  </div>
+  <div class="campo">
+    <label for="inpObs">Observações <span style="font-weight:400;color:var(--grafite)">(opcional)</span></label>
+    <textarea id="inpObs" placeholder="Detalhes do trabalho realizado"></textarea>
+  </div>
+  <button class="acao" id="btnRegistrar">Registrar atividade</button>
+  <div class="aviso" id="aviso" role="status"></div>
+</section>
+
+<!-- Totais (perfil servidor) -->
+<div class="totais" id="totaisServidor" hidden>
+  <div class="total"><small>Total no dia selecionado</small><b id="totDia">0</b></div>
+  <div class="total"><small>Total no mês</small><b id="totMes">0</b></div>
+</div>
+
+<!-- Painel de lançamentos (todos os perfis) -->
+<section class="card" id="cardPainel" hidden style="border-left-color:var(--verde)">
+  <h2 id="tituloPainel">Lançamentos</h2>
+  <p class="hint" id="hintPainel"></p>
+
+  <div class="filtros">
+    <div class="campo" id="fUnidadeGeral" hidden>
+      <label for="selUnidadeVer">Unidade</label>
+      <select id="selUnidadeVer"></select>
+    </div>
+    <div class="campo">
+      <label for="inpMes">Mês de referência</label>
+      <input type="month" id="inpMes">
+    </div>
+    <div class="campo" id="fServidor" hidden>
+      <label for="selServidorVer">Servidor</label>
+      <select id="selServidorVer"></select>
+    </div>
+    <div class="campo" id="fSituacao" hidden>
+      <label for="selSituacao">Situação</label>
+      <select id="selSituacao">
+        <option value="">Todas</option>
+        <option value="pe">Pendentes</option>
+        <option value="ap">Aprovados</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="resumo" id="resumo" hidden></div>
+
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th id="thServidor">Servidor</th>
+          <th class="atv">Atividade</th>
+          <th class="esconde-m">Compl.</th>
+          <th class="num">Pontos</th>
+          <th>Situação</th>
+          <th id="thAcao"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <p class="vazio" id="vazio">Nenhum lançamento com os filtros atuais.</p>
+  </div>
+
+  <div class="export">
+    <button class="acao mini" id="btnAprovarTodos" hidden>Aprovar todos os pendentes exibidos</button>
+    <button class="acao sec mini" id="btnCSV">Exportar CSV da visão atual</button>
+  </div>
+  <div class="aviso" id="avisoPainel" role="status"></div>
+</section>
+
+</div>
+
+<script src="catalogo.js"></script>
+<script src="rede.js"></script>
+<script>
+"use strict";
+/* =============================== ESTADO =============================== */
+const CHAVE_ID = "ra.identificacao.v2";
+let ident = null;        // {perfil, unidade, nome}
+let dirRaiz = null;      // handle da pasta unidadeCentral
+let complexidade = null;
+let dados = { registros: [], aprovacoes: {} };   // cache da visão atual
+
+const $ = (id) => document.getElementById(id);
+const chips = [...document.querySelectorAll(".chip")];
+const fmtData = (iso) => iso.split("-").reverse().join("/");
+const hoje = () => new Date().toLocaleDateString("sv");
+const ehServidor = () => ident?.perfil === "servidor";
+const ehChefia   = () => ident?.perfil === "chefia";
+const ehGeral    = () => ident?.perfil === "geral";
+const modoPasta  = () => ehGeral() ? "read" : "readwrite";
+
+function avisar(el, msg, erro = false) {
+  el.textContent = msg;
+  el.className = "aviso" + (erro ? " erro" : "");
+  el.style.display = "block";
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = "none"; }, 5000);
+}
+
+/* ============================ IDENTIFICAÇÃO ============================ */
+function montarUnidades() {
+  $("selUnidade").innerHTML = Object.keys(UNIDADES)
+    .map(u => `<option value="${u}">${u}</option>`).join("");
+  montarServidores();
+}
+function montarServidores() {
+  const lista = UNIDADES[$("selUnidade").value] || [];
+  $("selServidor").innerHTML = lista.length
+    ? lista.map(s => `<option value="${s}">${s}</option>`).join("")
+    : `<option value="">— cadastre os servidores no catalogo.js —</option>`;
+}
+function ajustarCamposPerfil() {
+  const p = $("selPerfil").value;
+  $("cUnidade").hidden = (p === "geral");
+  $("cServidor").hidden = (p !== "servidor");
+  $("cNomeChefe").hidden = (p !== "chefia");
+}
+$("selPerfil").addEventListener("change", ajustarCamposPerfil);
+$("selUnidade").addEventListener("change", montarServidores);
+
+$("btnIniciar").addEventListener("click", () => {
+  const perfil = $("selPerfil").value;
+  const unidade = perfil === "geral" ? null : $("selUnidade").value;
+  let nome = null;
+  if (perfil === "servidor") {
+    nome = $("selServidor").value;
+    if (!nome) return avisar($("avisoIdent"),
+      "Esta unidade ainda não tem servidores cadastrados no catálogo.", true);
+  }
+  if (perfil === "chefia") {
+    nome = $("inpNomeChefe").value.trim();
+    if (!nome) return avisar($("avisoIdent"), "Informe o nome da chefia.", true);
+  }
+  ident = { perfil, unidade, nome };
+  localStorage.setItem(CHAVE_ID, JSON.stringify(ident));
+  const rot = { servidor: "", chefia: "Chefia", geral: "Chefia geral" }[perfil];
+  $("idAtual").innerHTML =
+    (nome || "Visualização geral") +
+    (rot ? ` <span class="pill chefia">${rot}</span>` : "") +
+    (unidade ? ` <span class="pill">${unidade}</span>` : "");
+  $("cardPasta").hidden = false;
+  prepararPainel();
+  conectarSilencioso();
+});
+
+/* ============================ PASTA DA REDE ============================ */
+function estadoConexao(ok, txt) {
+  $("led").className = "led" + (ok ? " ok" : "");
+  $("txtConexao").textContent = txt;
+  $("btnAtualizar").hidden = !ok;
+  $("btnPasta").textContent = ok ? "Trocar pasta" : "Conectar pasta";
+}
+async function conectarSilencioso() {
+  if (!("showDirectoryPicker" in window))
+    return avisar($("avisoPasta"),
+      "Este navegador não oferece acesso a pastas. Use Chrome ou Edge.", true);
+  const salvo = await obterHandleRaiz();
+  if (salvo && await garantirPermissao(salvo, modoPasta(), false)) {
+    dirRaiz = salvo;
+    estadoConexao(true, `Conectado a “${salvo.name}”`);
+    await recarregar();
+  } else if (salvo) {
+    estadoConexao(false, `Pasta “${salvo.name}” memorizada — clique para reconectar`);
+    $("btnPasta").textContent = "Reconectar pasta";
+  }
+}
+$("btnPasta").addEventListener("click", async () => {
+  try {
+    let handle = null;
+    const salvo = await obterHandleRaiz();
+    // 1º tenta reaproveitar a pasta memorizada (pede só a permissão)
+    if (salvo && $("btnPasta").textContent === "Reconectar pasta" &&
+        await garantirPermissao(salvo, modoPasta())) {
+      handle = salvo;
+    } else {
+      handle = await showDirectoryPicker({ id: "unidadeCentral", mode: modoPasta() });
+      await salvarHandleRaiz(handle);
+    }
+    dirRaiz = handle;
+    estadoConexao(true, `Conectado a “${handle.name}”`);
+    await recarregar();
+  } catch (e) {
+    if (e && e.name !== "AbortError")
+      avisar($("avisoPasta"), "Não foi possível acessar a pasta: " + e.message, true);
+  }
+});
+$("btnAtualizar").addEventListener("click", recarregar);
+
+/* =========================== CARREGAR DADOS =========================== */
+async function recarregar() {
+  if (!dirRaiz) return;
+  try {
+    if (ehServidor()) {
+      const meu = await lerMeuArquivo(dirRaiz, ident.unidade, ident.nome);
+      dados.registros = (meu && meu.registros) || [];
+      dados.aprovacoes = await lerAprovacoes(dirRaiz, ident.unidade);
+      $("cardForm").hidden = false;
+      $("totaisServidor").hidden = false;
+    } else if (ehChefia()) {
+      dados.registros = await lerLancamentosDaUnidade(dirRaiz, ident.unidade);
+      dados.aprovacoes = await lerAprovacoes(dirRaiz, ident.unidade);
+    } else { // chefia geral
+      const u = $("selUnidadeVer").value;
+      const unidades = u === "*" ? Object.keys(UNIDADES) : [u];
+      dados.registros = []; dados.aprovacoes = {};
+      for (const un of unidades) {
+        dados.registros.push(...await lerLancamentosDaUnidade(dirRaiz, un));
+        Object.assign(dados.aprovacoes, await lerAprovacoes(dirRaiz, un));
+      }
+    }
+    $("cardPainel").hidden = false;
+    render();
+  } catch (e) {
+    avisar($("avisoPasta"), "Falha ao ler a pasta da rede: " + e.message, true);
+  }
+}
+
+/* ========================= FORMULÁRIO (SERVIDOR) ========================= */
+function montarProcessos() {
+  $("selProcesso").innerHTML = PROCESSOS
+    .map((p, i) => `<option value="${i}">${p.nome}</option>`).join("");
+  montarAtividades();
+}
+function montarAtividades() {
+  const p = PROCESSOS[+$("selProcesso").value];
+  $("selAtividade").innerHTML = p.atividades
+    .map((a, i) => `<option value="${i}">${a.t}</option>`).join("");
+  atualizarChips();
+}
+function atualizarChips() {
+  const a = PROCESSOS[+$("selProcesso").value].atividades[+$("selAtividade").value];
+  complexidade = null;
+  chips.forEach(ch => {
+    ch.disabled = !a.c.includes(ch.dataset.c);
+    ch.setAttribute("aria-pressed", "false");
+  });
+  if (a.c.length === 1) selecionarChip(a.c[0]);
+}
+function selecionarChip(c) {
+  complexidade = c;
+  chips.forEach(ch => ch.setAttribute("aria-pressed", String(ch.dataset.c === c)));
+}
+chips.forEach(ch => ch.addEventListener("click", () => selecionarChip(ch.dataset.c)));
+$("selProcesso").addEventListener("change", montarAtividades);
+$("selAtividade").addEventListener("change", atualizarChips);
+
+$("btnRegistrar").addEventListener("click", async () => {
+  if (!ehServidor()) return;
+  if (!dirRaiz) return avisar($("aviso"), "Conecte a pasta da rede antes de registrar.", true);
+  const data = $("inpData").value;
+  if (!data) return avisar($("aviso"), "Informe a data do lançamento.", true);
+  if (!complexidade) return avisar($("aviso"), "Escolha a complexidade da atividade.", true);
+  const p = PROCESSOS[+$("selProcesso").value];
+  const a = p.atividades[+$("selAtividade").value];
+  const reg = {
+    id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+    data, unidade: ident.unidade, servidor: ident.nome,
+    processo: p.nome, atividade: a.t,
+    complexidade, pontos: PONTOS[complexidade],
+    obs: $("inpObs").value.trim(),
+    abono: $("chkAbono").checked
+  };
+  try {
+    // relê o arquivo antes de gravar (frescor entre abas/sessões)
+    const atual = await lerMeuArquivo(dirRaiz, ident.unidade, ident.nome);
+    const regs = (atual && atual.registros) || [];
+    regs.push(reg);
+    await gravarMeuArquivo(dirRaiz, ident.unidade, ident.nome, regs);
+    dados.registros = regs;
+    $("inpObs").value = ""; $("chkAbono").checked = false;
+    $("inpMes").value = data.slice(0, 7);
+    avisar($("aviso"), `Atividade registrada — ${reg.pontos} pontos em ${fmtData(data)}.`);
+    render();
+  } catch (e) {
+    avisar($("aviso"), "Não foi possível gravar na rede: " + e.message, true);
+  }
+});
+
+/* ============================ PAINEL / TABELA ============================ */
+function prepararPainel() {
+  $("thAcao").textContent = "";
+  $("fSituacao").hidden = !(ehChefia() || ehGeral());
+  $("fServidor").hidden = !(ehChefia() || ehGeral());
+  $("fUnidadeGeral").hidden = !ehGeral();
+  $("btnAprovarTodos").hidden = !ehChefia();
+  $("thServidor").classList.toggle("esconde-m", ehServidor());
+  $("resumo").hidden = ehServidor();
+  if (ehGeral()) {
+    $("selUnidadeVer").innerHTML =
+      `<option value="*">Todas as unidades</option>` +
+      Object.keys(UNIDADES).map(u => `<option value="${u}">${u}</option>`).join("");
+  }
+  $("tituloPainel").textContent =
+    ehServidor() ? "Meus lançamentos" :
+    ehChefia()   ? `Lançamentos da unidade ${ident.unidade}` :
+                   "Lançamentos de todas as unidades";
+  $("hintPainel").textContent =
+    ehServidor() ? "A situação é definida pela chefia da unidade." :
+    ehChefia()   ? "Marque a situação para aprovar cada lançamento; os servidores veem a atualização ao recarregar os dados." :
+                   "Visualização somente leitura.";
+  if (!$("inpMes").value) $("inpMes").value = hoje().slice(0, 7);
+}
+
+function registrosFiltrados() {
+  const mes = $("inpMes").value;
+  const srv = $("selServidorVer").value;
+  const sit = $("selSituacao").value;
+  return dados.registros
+    .filter(r => r.data.startsWith(mes))
+    .filter(r => ehServidor() ? r.servidor === ident.nome : true)
+    .filter(r => (!srv || srv === "*") ? true : r.servidor === srv)
+    .filter(r => !sit ? true :
+      (sit === "ap") === Boolean(dados.aprovacoes[r.id]))
+    .sort((x, y) => x.data.localeCompare(y.data) ||
+                    x.servidor.localeCompare(y.servidor) ||
+                    x.id.localeCompare(y.id));
+}
+
+function render() {
+  if (!ident) return;
+  // filtro de servidores (visões de chefia) preservando a seleção
+  if (ehChefia() || ehGeral()) {
+    const nomes = [...new Set(dados.registros.map(r => r.servidor))].sort();
+    const sel = $("selServidorVer"); const antes = sel.value;
+    sel.innerHTML = `<option value="*">Todos os servidores</option>` +
+      nomes.map(n => `<option value="${n}">${n}</option>`).join("");
+    if (nomes.includes(antes)) sel.value = antes;
+  }
+
+  const regs = registrosFiltrados();
+  const linhas = [];
+  let i = 0;
+  while (i < regs.length) {
+    const dia = regs[i].data;
+    let somaDia = 0;
+    while (i < regs.length && regs[i].data === dia) {
+      const r = regs[i]; somaDia += r.pontos;
+      const ap = dados.aprovacoes[r.id];
+      const situacao = ehChefia()
+        ? `<label style="font-weight:400;display:flex;gap:6px;align-items:center;white-space:nowrap">
+             <input type="checkbox" data-ap="${r.id}" ${ap ? "checked" : ""}>
+             <span class="st ${ap ? "ap" : "pe"}">${ap ? "Aprovado" : "Pendente"}</span>
+           </label>`
+        : `<span class="st ${ap ? "ap" : "pe"}" title="${ap ? "Aprovado por " + (ap.por || "chefia") : "Aguardando a chefia"}">${ap ? "Aprovado" : "Pendente"}</span>`;
+      const acao = (ehServidor() && !ap)
+        ? `<button class="excluir" data-del="${r.id}" aria-label="Excluir lançamento">Excluir</button>` : "";
+      linhas.push(`<tr>
+        <td>${fmtData(r.data)}</td>
+        <td class="${ehServidor() ? "esconde-m" : ""}">${r.servidor}</td>
+        <td class="atv" title="${r.processo}">${r.atividade}${r.abono ? ' <span class="tag-abono">abono</span>' : ''}${r.obs ? `<br><small style="color:var(--grafite)">${r.obs}</small>` : ""}</td>
+        <td class="esconde-m">${ROTULO_COMPLEXIDADE[r.complexidade]}</td>
+        <td class="num">${r.pontos}</td>
+        <td>${situacao}</td>
+        <td>${acao}</td>
+      </tr>`);
+      i++;
+    }
+    linhas.push(`<tr class="subtotal"><td colspan="4">Total do dia ${fmtData(dia)}</td>
+      <td class="num">${somaDia}</td><td colspan="2"></td></tr>`);
+  }
+  $("tbody").innerHTML = linhas.join("");
+  $("vazio").style.display = regs.length ? "none" : "block";
+
+  // totais do servidor
+  if (ehServidor()) {
+    const diaSel = $("inpData").value;
+    $("totDia").textContent = regs.filter(r => r.data === diaSel)
+                                  .reduce((s, r) => s + r.pontos, 0);
+    $("totMes").textContent = regs.reduce((s, r) => s + r.pontos, 0);
+  }
+
+  // resumo por servidor (chefias)
+  if (ehChefia() || ehGeral()) {
+    const porSrv = {};
+    for (const r of regs) {
+      porSrv[r.servidor] ??= { pts: 0, pend: 0 };
+      porSrv[r.servidor].pts += r.pontos;
+      if (!dados.aprovacoes[r.id]) porSrv[r.servidor].pend++;
+    }
+    $("resumo").innerHTML = Object.entries(porSrv).sort()
+      .map(([n, v]) => `<div class="srv">${n}<br><b>${v.pts}</b> pts
+        <small>· ${v.pend ? v.pend + " pendente(s)" : "tudo aprovado"}</small></div>`)
+      .join("") || "";
+    $("btnAprovarTodos").disabled = !regs.some(r => !dados.aprovacoes[r.id]);
+  }
+}
+
+["inpMes", "selServidorVer", "selSituacao"].forEach(id =>
+  $(id).addEventListener("change", render));
+$("selUnidadeVer").addEventListener("change", recarregar);
+$("inpData").addEventListener("change", render);
+
+/* -------- ações na tabela: excluir (servidor) e aprovar (chefia) -------- */
+$("tbody").addEventListener("click", async (e) => {
+  const del = e.target.dataset.del;
+  if (del && ehServidor() && confirm("Excluir este lançamento?")) {
+    try {
+      const atual = await lerMeuArquivo(dirRaiz, ident.unidade, ident.nome);
+      const regs = ((atual && atual.registros) || []).filter(r => r.id !== del);
+      await gravarMeuArquivo(dirRaiz, ident.unidade, ident.nome, regs);
+      dados.registros = regs;
+      render();
+    } catch (er) {
+      avisar($("avisoPainel"), "Não foi possível gravar na rede: " + er.message, true);
+    }
+  }
+});
+$("tbody").addEventListener("change", (e) => {
+  const id = e.target.dataset.ap;
+  if (id && ehChefia()) aplicarAprovacao([id], e.target.checked);
+});
+$("btnAprovarTodos").addEventListener("click", () => {
+  const ids = registrosFiltrados().filter(r => !dados.aprovacoes[r.id]).map(r => r.id);
+  if (ids.length && confirm(`Aprovar ${ids.length} lançamento(s) pendente(s)?`))
+    aplicarAprovacao(ids, true);
+});
+async function aplicarAprovacao(ids, aprovar) {
+  try {
+    // relê o arquivo de aprovações antes de gravar
+    const mapa = await lerAprovacoes(dirRaiz, ident.unidade);
+    for (const id of ids) {
+      if (aprovar) mapa[id] = { por: ident.nome, em: new Date().toISOString() };
+      else delete mapa[id];
+    }
+    await gravarAprovacoes(dirRaiz, ident.unidade, mapa, ident.nome);
+    dados.aprovacoes = mapa;
+    avisar($("avisoPainel"),
+      `${ids.length} lançamento(s) ${aprovar ? "aprovado(s)" : "marcado(s) como pendente(s)"}.`);
+    render();
+  } catch (e) {
+    avisar($("avisoPainel"), "Não foi possível gravar as aprovações: " + e.message, true);
+  }
+}
+
+/* ------------------------------- CSV ------------------------------- */
+$("btnCSV").addEventListener("click", () => {
+  const regs = registrosFiltrados();
+  const esc = (v) => `"${String(v ?? "").replaceAll('"', '""')}"`;
+  const cab = ["Data", "Unidade", "Servidor", "Processo", "Atividade", "Complexidade",
+               "Pontuação", "Observações", "Abono", "Situação", "Aprovado por", "Aprovado em"];
+  const linhas = regs.map(r => {
+    const ap = dados.aprovacoes[r.id];
+    return [fmtData(r.data), r.unidade, r.servidor, r.processo, r.atividade,
+      ROTULO_COMPLEXIDADE[r.complexidade], r.pontos, r.obs,
+      r.abono ? "Sim" : "Não", ap ? "Aprovado" : "Pendente",
+      ap?.por || "", ap ? fmtData(ap.em.slice(0, 10)) : ""].map(esc).join(";");
+  });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(
+    ["\uFEFF" + cab.map(esc).join(";") + "\r\n" + linhas.join("\r\n")],
+    { type: "text/csv;charset=utf-8" }));
+  a.download = `registro-${ident.unidade || "todas"}-${$("inpMes").value}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+/* --------------------------- INICIALIZAÇÃO --------------------------- */
+montarUnidades();
+montarProcessos();
+ajustarCamposPerfil();
+$("inpData").value = hoje();
+try {
+  const salvo = JSON.parse(localStorage.getItem(CHAVE_ID));
+  if (salvo) {
+    $("selPerfil").value = salvo.perfil;
+    ajustarCamposPerfil();
+    if (salvo.unidade && UNIDADES[salvo.unidade]) {
+      $("selUnidade").value = salvo.unidade; montarServidores();
+    }
+    if (salvo.perfil === "servidor" &&
+        (UNIDADES[salvo.unidade] || []).includes(salvo.nome))
+      $("selServidor").value = salvo.nome;
+    if (salvo.perfil === "chefia") $("inpNomeChefe").value = salvo.nome || "";
+  }
+} catch {}
+
+if ("serviceWorker" in navigator && location.protocol.startsWith("http"))
+  navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>

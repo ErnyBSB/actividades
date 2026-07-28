@@ -1,0 +1,79 @@
+REGISTRO DE ATIVIDADES — COBIB (versão 2, PWA em rede)
+======================================================
+
+O que mudou em relação à v1
+---------------------------
+Os dados deixaram de morar no navegador de cada pessoa e passaram a
+morar na pasta central da rede, acessada pelo navegador (Chrome/Edge)
+via File System Access API:
+
+  \\COBIB\AmbienteTrabalho\unidadeCentral\
+  ├── SEORE\
+  │   ├── lancamentos\
+  │   │   ├── christiane-rocha.json   <- só a Christiane grava
+  │   │   └── silvia-regina.json      <- só a Silvia grava
+  │   └── aprovacoes.json             <- só a chefia da SEORE grava
+  ├── SEACE\ ... (idem para SEARI, SECAQ, SEDIN, SENOV, SEPERI, SEREN)
+
+Padrão "um arquivo, um único escritor": cada servidor grava apenas o
+seu arquivo de lançamentos e cada chefia grava apenas o arquivo de
+aprovações da sua unidade. Não há escrita concorrente no mesmo
+arquivo, então várias pessoas podem usar o sistema ao mesmo tempo em
+máquinas diferentes. As subpastas são criadas automaticamente pelo
+aplicativo no primeiro uso de cada unidade.
+
+Perfis
+------
+- Servidor: registra atividades (data, processo, atividade,
+  complexidade baixa/média/alta = 5/10/15 pontos, observações,
+  abono), vê totais do dia e do mês e a situação de cada lançamento
+  (Pendente/Aprovado). Só pode excluir lançamentos ainda pendentes.
+- Chefia da unidade: vê todos os lançamentos da sua unidade, com
+  filtros por mês, servidor e situação; aprova individualmente ou em
+  lote ("Aprovar todos os pendentes exibidos"); pode desfazer uma
+  aprovação. O nome informado fica registrado em "aprovado por".
+- Chefia geral: visualiza tudo, de todas as unidades (ou uma por
+  vez), somente leitura. O aplicativo pede permissão apenas de
+  leitura da pasta nesse perfil.
+
+Como usar
+---------
+1. Publique esta pasta do aplicativo em local acessível (pode ser a
+   própria rede, ex.: \\COBIB\AmbienteTrabalho\unidadeCentral\app).
+   Abrir o index.html com duplo clique no Chrome/Edge já funciona,
+   inclusive o acesso à pasta; para instalar como PWA (ícone próprio,
+   offline), sirva por HTTP(S) na intranet.
+2. Identifique-se (perfil, unidade, nome) e clique em Continuar.
+3. Conecte a pasta unidadeCentral no seletor do navegador. A escolha
+   fica memorizada; nas próximas sessões basta clicar em
+   "Reconectar pasta" para confirmar a permissão.
+   Dica: mapear a rede como unidade de disco (ex.: R:) torna a
+   navegação no seletor mais simples.
+4. Use "Atualizar dados da rede" para ver lançamentos/aprovações
+   feitos por outras pessoas desde que a tela foi aberta.
+
+Segurança recomendada (via permissões NTFS/AD, sem código)
+----------------------------------------------------------
+O aplicativo não tem autenticação própria — quem abre como chefia é
+chefia. O controle real deve vir das permissões da pasta:
+- cada servidor com escrita apenas no próprio arquivo (ou na pasta
+  lancamentos da sua unidade);
+- grupo da chefia de cada unidade com escrita em aprovacoes.json;
+- chefia geral e demais com somente leitura.
+Assim, mesmo que alguém abra o perfil errado, o Windows bloqueia a
+gravação indevida.
+
+Manutenção
+----------
+- catalogo.js: unidades, servidores por unidade, processos,
+  atividades e complexidades permitidas (mesmos processos para todas
+  as unidades).
+- Ao atualizar arquivos do aplicativo, incremente VERSAO em sw.js.
+- CSV exportado (com situação e "aprovado por") abre direto no Excel.
+
+Limitações conhecidas
+---------------------
+- Chrome e Edge apenas (decisão de projeto).
+- Sem trilha de auditoria além de "aprovado por/em"; sem assinatura.
+- A visão de outras máquinas exige clicar em "Atualizar dados da
+  rede" (não há notificação em tempo real).
