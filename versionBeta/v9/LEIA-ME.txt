@@ -1,0 +1,190 @@
+REGISTRO DE ATIVIDADES — COBIB (versão 9, PWA em rede)
+======================================================
+
+O que mudou em relação à v1
+---------------------------
+Os dados deixaram de morar no navegador de cada pessoa e passaram a
+morar na pasta central da rede, acessada pelo navegador (Chrome/Edge)
+via File System Access API:
+
+  \\COBIB\AmbienteTrabalho\unidadeCentral\
+  ├── SEORE\
+  │   ├── lancamentos\
+  │   │   ├── christiane-rocha.json   <- só a Christiane grava
+  │   │   ├── silvia-regina.json      <- só a Silvia grava
+  │   │   └── <chefia-da-seore>.json  <- lançamentos da própria chefia
+  │   └── aprovacoes.json             <- só a chefia da SEORE grava
+  │                                      (aprova os SERVIDORES da unidade)
+  ├── SEACE\ ... (idem para SEARI, SECAQ, SEDIN, SENOV, SEPERI, SEREN)
+  └── GERAL\
+      ├── lancamentos\
+      │   └── <chefia-geral>.json     <- lançamentos da chefia geral
+      └── aprovacoes.json             <- só a chefia geral grava
+                                         (aprova as CHEFIAS de unidade
+                                          e os próprios lançamentos)
+
+Padrão "um arquivo, um único escritor": cada servidor grava apenas o
+seu arquivo de lançamentos e cada chefia grava apenas o arquivo de
+aprovações da sua unidade. Não há escrita concorrente no mesmo
+arquivo, então várias pessoas podem usar o sistema ao mesmo tempo em
+máquinas diferentes. As subpastas são criadas automaticamente pelo
+aplicativo no primeiro uso de cada unidade.
+
+Escolha da atividade (novidade da v9)
+-------------------------------------
+Até a v8 a atividade era escolhida em duas listas suspensas: primeiro
+o processo de trabalho, depois a atividade. Isso obrigava a pessoa a
+adivinhar sob qual processo a sua tarefa estava classificada, e os
+textos das atividades (até 205 caracteres) apareciam cortados dentro
+da lista. Agora:
+
+- Campo de BUSCA único sobre todas as atividades do catálogo. Digite
+  qualquer parte do texto ("higienizar", "acervo raro", "evento") e a
+  lista filtra enquanto você digita, mostrando o processo de cada
+  atividade como legenda. Vários termos podem ser digitados em
+  qualquer ordem.
+- A busca ignora acentos e entende flexões: quem digita "catalogar"
+  encontra "catalogação"; "indexar" encontra "indexação". Se nada for
+  encontrado, tente outra palavra.
+- Ao escolher, o texto INTEGRAL da atividade fica visível na tela
+  antes de registrar — não há mais texto cortado.
+- Teclado: setas para percorrer, Enter para escolher, Esc para fechar.
+- O filtro por processo continua disponível, agora opcional, no link
+  "filtrar por processo" abaixo do campo.
+- ATIVIDADES FREQUENTES: acima da busca aparecem as cinco atividades
+  que a própria pessoa mais registrou, como botões de um clique. A
+  lista é calculada a partir do histórico da própria pessoa — não há
+  nada a configurar, e ela aparece assim que houver lançamentos.
+
+O catalogo.js não mudou: processos, atividades e complexidades
+continuam sendo editados exatamente como antes.
+
+Configuração central (config.json)
+----------------------------------
+A partir da v6, unidades, chefias, servidores, senhas e a exigência
+de senha vivem no arquivo config.json NA RAIZ da pasta unidadeCentral
+— por isso a conexão da pasta passou a ser a etapa 1 e a
+identificação a etapa 2. Na primeira conexão, o config.json é criado
+automaticamente a partir da semente do catalogo.js do aplicativo.
+Depois disso, o catalogo.js só continua valendo para PROCESSOS e
+ATIVIDADES; pessoas e senhas são administradas pelo perfil adm.
+
+Pasta oficial (selo de instalação)
+----------------------------------
+Somente o Administrador define a pasta central. Ao conectar-se a uma
+pasta virgem e confirmar sua identidade, o adm a OFICIALIZA: um selo
+(identificador único) é gravado no config.json. A partir daí:
+- Pessoas comuns só conseguem se identificar em pastas com o selo;
+  em pasta não oficializada, a lista mostra apenas "Administrador".
+- Se alguém conectar uma pasta com selo DIFERENTE do já usado naquele
+  computador, o aplicativo recusa (evita apontar para pasta errada e
+  fragmentar os dados); só o adm pode confirmar a troca.
+Limite do navegador: a seleção da pasta não pode ser automatizada —
+cada pessoa faz o gesto de escolha uma única vez por computador
+(depois basta "Reconectar"); o caminho exibido como orientação na
+etapa 1 vem da constante PASTA_REDE no catalogo.js.
+
+Perfil Administrador
+--------------------
+Na lista de identificação há a opção "Administrador" (senha inicial:
+adm — TROQUE-A no primeiro acesso, no próprio painel). O adm não
+registra atividades nem aprova; seu painel permite:
+- Senhas: definir/alterar/remover a senha de qualquer pessoa e a sua
+  própria; ativar "exigir senha de todos".
+- Lançamentos: visualizar tudo (como a chefia geral) e EXCLUIR
+  qualquer lançamento para correção de erros, inclusive aprovados
+  (a aprovação órfã é removida junto).
+- Catálogo: editar o JSON de unidades/chefias/servidores e a chefia
+  geral, com validação, direto no config.json. Renomear uma pessoa
+  desvincula a senha e o arquivo de lançamentos do nome antigo.
+
+Perfis (todos registram atividades, exceto o adm)
+-------------------------------------------------
+Cada lançamento carrega o papel de quem o criou (servidor, chefia ou
+chefia geral), e é o papel que define quem aprova:
+
+- Servidor: registra atividades; aprovado pela CHEFIA DA UNIDADE.
+- Chefia da unidade: registra as próprias atividades (gravadas na
+  pasta da unidade) e aprova os lançamentos dos servidores da
+  unidade. Os lançamentos da própria chefia aparecem como
+  "Pendente" até a CHEFIA GERAL aprovar — a chefia não consegue
+  aprovar a si mesma.
+- Chefia geral: visualiza tudo (todas as unidades ou uma por vez),
+  registra as próprias atividades (pasta GERAL) e aprova, no painel
+  geral, os lançamentos das chefias de unidade e os seus próprios.
+  Os lançamentos dos servidores aparecem somente para visualização.
+
+Todos veem seus totais pessoais (dia/mês) e a situação de cada
+lançamento (Pendente/Aprovado, com "aprovado por"). Lançamentos só
+podem ser excluídos pelo próprio autor e enquanto pendentes.
+
+Como usar
+---------
+1. Publique esta pasta do aplicativo em local acessível (pode ser a
+   própria rede, ex.: \\COBIB\AmbienteTrabalho\unidadeCentral\app).
+   Abrir o index.html com duplo clique no Chrome/Edge já funciona,
+   inclusive o acesso à pasta; para instalar como PWA (ícone próprio,
+   offline), sirva por HTTP(S) na intranet.
+2. Identifique-se escolhendo apenas o seu NOME na lista — o papel
+   (servidor/chefia/chefia geral) e a unidade vêm do catalogo.js e
+   não podem ser alterados na tela. A identidade fica travada na
+   sessão; para mudar, use "Trocar identidade", que fecha e
+   recarrega os painéis (evita resíduo de permissões de um papel
+   anterior). ATENÇÃO: preencha as chefias reais no catalogo.js —
+   os nomes "Exemplo Chefia ..." são apenas demonstrativos.
+3. Conecte a pasta unidadeCentral no seletor do navegador. A escolha
+   fica memorizada; nas próximas sessões basta clicar em
+   "Reconectar pasta" para confirmar a permissão.
+   Dica: mapear a rede como unidade de disco (ex.: R:) torna a
+   navegação no seletor mais simples.
+4. Use "Atualizar dados da rede" para ver lançamentos/aprovações
+   feitos por outras pessoas desde que a tela foi aberta.
+
+Senhas (opcionais, no catalogo.js)
+----------------------------------
+É possível exigir senha após a escolha do nome. O catalogo.js guarda
+apenas o hash SHA-256 de (nome + "|" + senha) — nunca a senha em si:
+1. Abra gerar-senha.html, digite o nome (idêntico ao catálogo) e a
+   senha; copie a linha gerada.
+2. Cole a linha dentro de SENHAS no catalogo.js.
+3. EXIGIR_SENHA = false: quem tem hash cadastrado precisa da senha,
+   quem não tem entra livremente (fase de transição).
+   EXIGIR_SENHA = true: só entra quem tiver hash cadastrado.
+A identidade confirmada fica memorizada no navegador da pessoa
+(como um "lembrar-me"); "Trocar identidade" volta a exigir a senha.
+Troca de senha = gerar novo hash e substituir a linha.
+
+Entenda o alcance: a senha impede o uso casual ou acidental de
+identidade alheia dentro do aplicativo. Ela NÃO impede alguém
+decidido de editar os arquivos JSON diretamente na pasta da rede —
+para isso, o controle continua sendo o abaixo.
+
+Segurança recomendada (via permissões NTFS/AD, sem código)
+----------------------------------------------------------
+O aplicativo não tem autenticação própria — quem abre como chefia é
+chefia. O controle real deve vir das permissões da pasta:
+- cada servidor com escrita apenas no próprio arquivo (ou na pasta
+  lancamentos da sua unidade);
+- grupo da chefia de cada unidade com escrita em aprovacoes.json da
+  sua unidade (e no próprio arquivo de lançamentos);
+- chefia geral com escrita apenas na pasta GERAL;
+- administrador(es) com escrita em config.json e, se a exclusão
+  administrativa de lançamentos for desejada, na árvore toda;
+- demais acessos somente leitura.
+Assim, mesmo que alguém abra o perfil errado, o Windows bloqueia a
+gravação indevida.
+
+Manutenção
+----------
+- catalogo.js: unidades, servidores por unidade, processos,
+  atividades e complexidades permitidas (mesmos processos para todas
+  as unidades).
+- Ao atualizar arquivos do aplicativo, incremente VERSAO em sw.js.
+- CSV exportado (com situação e "aprovado por") abre direto no Excel.
+
+Limitações conhecidas
+---------------------
+- Chrome e Edge apenas (decisão de projeto).
+- Sem trilha de auditoria além de "aprovado por/em"; sem assinatura.
+- A visão de outras máquinas exige clicar em "Atualizar dados da
+  rede" (não há notificação em tempo real).
