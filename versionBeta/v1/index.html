@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registro de Atividades — COBIB</title>
+<meta name="description" content="Registro diário de processos de trabalho e atividades por unidade e servidor.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#22352C">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{
+  --tinta:#22352C;        /* verde-tinta */
+  --papel:#F5F6F2;        /* papel frio */
+  --ficha:#FFFFFF;
+  --verde:#2F5D4A;        /* accent principal */
+  --verde-suave:#E4EEE8;
+  --dourado:#A8852F;      /* lombada */
+  --grafite:#5C6660;
+  --linha:#D6DBD5;
+  --erro:#9C3B31;
+  --raio:6px;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--papel); color:var(--tinta);
+  font-family:var(--sans); font-size:15px; line-height:1.5;
+}
+.wrap{max-width:920px; margin:0 auto; padding:0 20px 64px}
+
+/* Cabeçalho — registro de ficha catalográfica */
+header{
+  border-bottom:3px double var(--tinta);
+  padding:28px 0 16px; margin-bottom:28px;
+}
+header .eyebrow{
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--grafite); margin:0 0 6px;
+}
+header h1{
+  font-family:var(--serif); font-weight:600; font-size:clamp(24px,4vw,32px);
+  margin:0; line-height:1.15;
+}
+header .sub{margin:6px 0 0; color:var(--grafite); font-size:13px}
+header .sub .pill{
+  display:inline-block; background:var(--verde-suave); color:var(--verde);
+  border-radius:999px; padding:1px 10px; font-weight:600; margin-left:6px;
+}
+
+/* Cartões-ficha */
+.card{
+  background:var(--ficha); border:1px solid var(--linha); border-radius:var(--raio);
+  border-left:4px solid var(--dourado);
+  padding:22px; margin-bottom:22px;
+}
+.card h2{
+  font-family:var(--serif); font-size:18px; font-weight:600;
+  margin:0 0 4px;
+}
+.card .hint{margin:0 0 16px; color:var(--grafite); font-size:13px}
+
+label{display:block; font-weight:600; font-size:13px; margin:0 0 4px}
+select,input[type=date],textarea{
+  width:100%; padding:9px 10px; font:inherit; color:var(--tinta);
+  background:#fff; border:1px solid var(--linha); border-radius:var(--raio);
+}
+select:focus,input:focus,textarea:focus,button:focus-visible{
+  outline:2px solid var(--verde); outline-offset:1px;
+}
+textarea{resize:vertical; min-height:64px}
+.grid{display:grid; gap:14px}
+.grid.c2{grid-template-columns:1fr 1fr}
+@media(max-width:640px){.grid.c2{grid-template-columns:1fr}}
+.campo{margin-bottom:14px}
+
+/* Chips de complexidade — o "carimbo" de pontuação */
+.chips{display:flex; gap:10px; flex-wrap:wrap}
+.chip{
+  border:1.5px solid var(--linha); background:#fff; border-radius:var(--raio);
+  padding:8px 14px; font:inherit; cursor:pointer; color:var(--grafite);
+  display:flex; flex-direction:column; align-items:center; min-width:88px;
+  transition:border-color .12s, background .12s;
+}
+.chip b{font-size:18px; font-family:var(--serif); color:inherit}
+.chip small{font-size:11px; letter-spacing:.08em; text-transform:uppercase}
+.chip[aria-pressed=true]{
+  border-color:var(--verde); background:var(--verde-suave); color:var(--verde);
+}
+.chip:disabled{opacity:.35; cursor:not-allowed}
+
+.acao{
+  background:var(--verde); color:#fff; border:0; border-radius:var(--raio);
+  padding:11px 22px; font:inherit; font-weight:600; cursor:pointer;
+}
+.acao:hover{background:#264b3c}
+.acao.sec{background:#fff; color:var(--verde); border:1.5px solid var(--verde)}
+.acao.sec:hover{background:var(--verde-suave)}
+.acao.mini{padding:6px 12px; font-size:13px; font-weight:500}
+
+.aviso{
+  background:var(--verde-suave); border-radius:var(--raio); color:var(--verde);
+  padding:10px 14px; font-size:13px; margin-top:12px; display:none;
+}
+.aviso.erro{background:#F6E7E4; color:var(--erro)}
+
+/* Resumo de totais */
+.totais{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px}
+@media(max-width:640px){.totais{grid-template-columns:1fr}}
+.total{
+  background:var(--tinta); color:var(--papel); border-radius:var(--raio);
+  padding:16px 20px;
+}
+.total small{display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; opacity:.75}
+.total b{font-family:var(--serif); font-size:30px; font-weight:600}
+
+/* Tabela de lançamentos */
+.filtros{display:flex; gap:12px; align-items:end; flex-wrap:wrap; margin-bottom:14px}
+.filtros .campo{margin:0}
+.filtros input[type=month]{padding:8px 10px; font:inherit; border:1px solid var(--linha); border-radius:var(--raio); background:#fff}
+table{width:100%; border-collapse:collapse; font-size:13.5px}
+th{
+  text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--grafite); border-bottom:2px solid var(--tinta); padding:8px 8px;
+}
+td{border-bottom:1px solid var(--linha); padding:9px 8px; vertical-align:top}
+td.num,th.num{text-align:right; font-variant-numeric:tabular-nums}
+tr.subtotal td{
+  background:var(--verde-suave); color:var(--verde); font-weight:600;
+  border-bottom:1px solid var(--linha);
+}
+.atv{max-width:340px}
+.excluir{background:none; border:0; color:var(--erro); cursor:pointer; font-size:13px; padding:2px}
+.vazio{color:var(--grafite); text-align:center; padding:28px 0}
+.export{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+.tag-abono{background:#F2ECDD; color:var(--dourado); border-radius:999px; padding:0 8px; font-size:11px; font-weight:600}
+@media(max-width:720px){
+  .esconde-m{display:none}
+  .atv{max-width:none}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">COBIB · Registro diário de produção</p>
+  <h1>Registro de Atividades</h1>
+  <p class="sub" id="idAtual">Nenhum servidor identificado</p>
+</header>
+
+<!-- ETAPA 1 — Identificação -->
+<section class="card" id="cardIdent">
+  <h2>1 · Identificação</h2>
+  <p class="hint">Escolha a unidade de trabalho e o servidor para iniciar os lançamentos.</p>
+  <div class="grid c2">
+    <div class="campo">
+      <label for="selUnidade">Unidade de trabalho</label>
+      <select id="selUnidade"></select>
+    </div>
+    <div class="campo">
+      <label for="selServidor">Servidor</label>
+      <select id="selServidor"></select>
+    </div>
+  </div>
+  <button class="acao" id="btnIniciar">Iniciar lançamentos</button>
+</section>
+
+<!-- ETAPA 2 — Lançamento -->
+<section class="card" id="cardForm" hidden>
+  <h2>2 · Novo lançamento</h2>
+  <p class="hint">Registre a atividade realizada. A pontuação é definida pela complexidade.</p>
+
+  <div class="grid c2">
+    <div class="campo">
+      <label for="inpData">Data</label>
+      <input type="date" id="inpData">
+    </div>
+    <div class="campo">
+      <label for="chkAbono" style="margin-bottom:10px">Abono</label>
+      <label style="font-weight:400; display:flex; gap:8px; align-items:center">
+        <input type="checkbox" id="chkAbono"> Lançamento referente a abono
+      </label>
+    </div>
+  </div>
+
+  <div class="campo">
+    <label for="selProcesso">Processo de trabalho</label>
+    <select id="selProcesso"></select>
+  </div>
+
+  <div class="campo">
+    <label for="selAtividade">Atividade</label>
+    <select id="selAtividade"></select>
+  </div>
+
+  <div class="campo">
+    <label>Complexidade e pontuação</label>
+    <div class="chips" id="chips" role="group" aria-label="Complexidade">
+      <button type="button" class="chip" data-c="b" aria-pressed="false"><b>5</b><small>Baixa</small></button>
+      <button type="button" class="chip" data-c="m" aria-pressed="false"><b>10</b><small>Média</small></button>
+      <button type="button" class="chip" data-c="a" aria-pressed="false"><b>15</b><small>Alta</small></button>
+    </div>
+  </div>
+
+  <div class="campo">
+    <label for="inpObs">Observações <span style="font-weight:400;color:var(--grafite)">(opcional)</span></label>
+    <textarea id="inpObs" placeholder="Detalhes do trabalho realizado"></textarea>
+  </div>
+
+  <button class="acao" id="btnRegistrar">Registrar atividade</button>
+  <div class="aviso" id="aviso" role="status"></div>
+</section>
+
+<!-- Totais e lançamentos -->
+<section id="secLista" hidden>
+  <div class="totais">
+    <div class="total"><small>Total no dia selecionado</small><b id="totDia">0</b></div>
+    <div class="total"><small>Total no mês</small><b id="totMes">0</b></div>
+  </div>
+
+  <div class="card" style="border-left-color:var(--verde)">
+    <h2>Lançamentos</h2>
+    <div class="filtros">
+      <div class="campo">
+        <label for="inpMes">Mês de referência</label>
+        <input type="month" id="inpMes">
+      </div>
+      <div class="campo">
+        <label for="selVer">Exibir</label>
+        <select id="selVer">
+          <option value="servidor">Somente meus lançamentos</option>
+          <option value="unidade">Toda a unidade</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th><th class="esconde-m">Servidor</th><th class="atv">Atividade</th>
+            <th class="esconde-m">Compl.</th><th class="num">Pontos</th>
+            <th>Aprovado</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <p class="vazio" id="vazio">Nenhum lançamento neste mês. Registre a primeira atividade acima.</p>
+    </div>
+    <div class="export">
+      <button class="acao sec mini" id="btnCSV">Exportar CSV do mês (unidade)</button>
+      <button class="acao sec mini" id="btnBackup">Backup JSON</button>
+      <button class="acao sec mini" id="btnImportar">Importar JSON</button>
+      <input type="file" id="fileImport" accept="application/json" hidden>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script src="catalogo.js"></script>
+<script>
+"use strict";
+/* ---------- Persistência ---------- */
+const CHAVE = "ra.registros.v1";
+const CHAVE_ID = "ra.identificacao.v1";
+const lerRegistros = () => { try { return JSON.parse(localStorage.getItem(CHAVE)) || []; } catch { return []; } };
+const gravarRegistros = (r) => localStorage.setItem(CHAVE, JSON.stringify(r));
+
+/* ---------- Estado ---------- */
+let ident = null;            // {unidade, servidor}
+let complexidade = null;     // "b" | "m" | "a"
+
+/* ---------- Elementos ---------- */
+const $ = (id) => document.getElementById(id);
+const selUnidade=$("selUnidade"), selServidor=$("selServidor"),
+      selProcesso=$("selProcesso"), selAtividade=$("selAtividade"),
+      chips=[...document.querySelectorAll(".chip")],
+      aviso=$("aviso"), tbody=$("tbody");
+
+/* ---------- Identificação ---------- */
+function montarUnidades(){
+  selUnidade.innerHTML = Object.keys(UNIDADES)
+    .map(u => `<option value="${u}">${u}</option>`).join("");
+  montarServidores();
+}
+function montarServidores(){
+  const lista = UNIDADES[selUnidade.value] || [];
+  selServidor.innerHTML = lista.map(s => `<option value="${s}">${s}</option>`).join("");
+}
+selUnidade.addEventListener("change", montarServidores);
+
+$("btnIniciar").addEventListener("click", () => {
+  ident = { unidade: selUnidade.value, servidor: selServidor.value };
+  localStorage.setItem(CHAVE_ID, JSON.stringify(ident));
+  $("idAtual").innerHTML =
+    `${ident.servidor} <span class="pill">${ident.unidade}</span>`;
+  $("cardForm").hidden = false;
+  $("secLista").hidden = false;
+  render();
+  $("cardForm").scrollIntoView({behavior:"smooth", block:"start"});
+});
+
+/* ---------- Formulário ---------- */
+function montarProcessos(){
+  selProcesso.innerHTML = PROCESSOS
+    .map((p,i) => `<option value="${i}">${p.nome}</option>`).join("");
+  montarAtividades();
+}
+function montarAtividades(){
+  const p = PROCESSOS[+selProcesso.value];
+  selAtividade.innerHTML = p.atividades
+    .map((a,i) => `<option value="${i}">${a.t}</option>`).join("");
+  atualizarChips();
+}
+function atualizarChips(){
+  const a = PROCESSOS[+selProcesso.value].atividades[+selAtividade.value];
+  complexidade = null;
+  chips.forEach(ch => {
+    const ok = a.c.includes(ch.dataset.c);
+    ch.disabled = !ok;
+    ch.setAttribute("aria-pressed","false");
+  });
+  // pré-seleciona quando só há uma opção
+  if (a.c.length === 1) selecionarChip(a.c[0]);
+}
+function selecionarChip(c){
+  complexidade = c;
+  chips.forEach(ch => ch.setAttribute("aria-pressed", String(ch.dataset.c===c)));
+}
+chips.forEach(ch => ch.addEventListener("click", () => selecionarChip(ch.dataset.c)));
+selProcesso.addEventListener("change", montarAtividades);
+selAtividade.addEventListener("change", atualizarChips);
+
+function mostrarAviso(msg, erro=false){
+  aviso.textContent = msg;
+  aviso.className = "aviso" + (erro ? " erro" : "");
+  aviso.style.display = "block";
+  clearTimeout(mostrarAviso._t);
+  mostrarAviso._t = setTimeout(() => aviso.style.display="none", 4000);
+}
+
+$("btnRegistrar").addEventListener("click", () => {
+  if (!ident) return;
+  const data = $("inpData").value;
+  if (!data) return mostrarAviso("Informe a data do lançamento.", true);
+  if (!complexidade) return mostrarAviso("Escolha a complexidade da atividade.", true);
+  const p = PROCESSOS[+selProcesso.value];
+  const a = p.atividades[+selAtividade.value];
+  const reg = {
+    id: Date.now() + "-" + Math.random().toString(36).slice(2,7),
+    data, unidade: ident.unidade, servidor: ident.servidor,
+    processo: p.nome, atividade: a.t,
+    complexidade, pontos: PONTOS[complexidade],
+    obs: $("inpObs").value.trim(),
+    abono: $("chkAbono").checked,
+    aprovado: false
+  };
+  const regs = lerRegistros();
+  regs.push(reg);
+  gravarRegistros(regs);
+  $("inpObs").value = ""; $("chkAbono").checked = false;
+  $("inpMes").value = data.slice(0,7);
+  mostrarAviso(`Atividade registrada — ${reg.pontos} pontos em ${fmtData(data)}.`);
+  render();
+});
+
+/* ---------- Lista, totais e ações ---------- */
+const fmtData = (iso) => iso.split("-").reverse().join("/");
+
+function registrosDoMes(){
+  const mes = $("inpMes").value;
+  const so = $("selVer").value === "servidor";
+  return lerRegistros().filter(r =>
+    r.unidade === ident.unidade &&
+    r.data.startsWith(mes) &&
+    (!so || r.servidor === ident.servidor)
+  ).sort((x,y) => x.data.localeCompare(y.data) || x.id.localeCompare(y.id));
+}
+
+function render(){
+  if (!ident) return;
+  if (!$("inpMes").value) $("inpMes").value = ($("inpData").value || hoje()).slice(0,7);
+  const regs = registrosDoMes();
+  const linhas = [];
+  let i = 0;
+  while (i < regs.length){
+    const dia = regs[i].data;
+    let somaDia = 0;
+    while (i < regs.length && regs[i].data === dia){
+      const r = regs[i]; somaDia += r.pontos;
+      linhas.push(`<tr>
+        <td>${fmtData(r.data)}</td>
+        <td class="esconde-m">${r.servidor}</td>
+        <td class="atv" title="${r.processo}">${r.atividade}${r.abono?' <span class="tag-abono">abono</span>':''}</td>
+        <td class="esconde-m">${ROTULO_COMPLEXIDADE[r.complexidade]}</td>
+        <td class="num">${r.pontos}</td>
+        <td><input type="checkbox" data-ap="${r.id}" ${r.aprovado?"checked":""} aria-label="Aprovado pela chefia"></td>
+        <td><button class="excluir" data-del="${r.id}" aria-label="Excluir lançamento">Excluir</button></td>
+      </tr>`);
+      i++;
+    }
+    linhas.push(`<tr class="subtotal"><td colspan="4">Total do dia ${fmtData(dia)}</td>
+      <td class="num">${somaDia}</td><td colspan="2"></td></tr>`);
+  }
+  tbody.innerHTML = linhas.join("");
+  $("vazio").style.display = regs.length ? "none" : "block";
+
+  // Totais dos cartões (sempre do servidor identificado)
+  const meus = regs.filter(r => r.servidor === ident.servidor);
+  const diaSel = $("inpData").value;
+  $("totDia").textContent = meus.filter(r => r.data === diaSel)
+                                .reduce((s,r) => s + r.pontos, 0);
+  $("totMes").textContent = meus.reduce((s,r) => s + r.pontos, 0);
+}
+
+tbody.addEventListener("click", (e) => {
+  const del = e.target.dataset.del;
+  if (del && confirm("Excluir este lançamento?")){
+    gravarRegistros(lerRegistros().filter(r => r.id !== del));
+    render();
+  }
+});
+tbody.addEventListener("change", (e) => {
+  const ap = e.target.dataset.ap;
+  if (ap){
+    const regs = lerRegistros();
+    const r = regs.find(r => r.id === ap);
+    if (r){ r.aprovado = e.target.checked; gravarRegistros(regs); }
+  }
+});
+$("inpMes").addEventListener("change", render);
+$("selVer").addEventListener("change", render);
+$("inpData").addEventListener("change", render);
+
+/* ---------- Exportações ---------- */
+function baixar(nome, conteudo, tipo){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([conteudo], {type: tipo}));
+  a.download = nome; a.click();
+  URL.revokeObjectURL(a.href);
+}
+$("btnCSV").addEventListener("click", () => {
+  const mes = $("inpMes").value;
+  const regs = lerRegistros()
+    .filter(r => r.unidade === ident.unidade && r.data.startsWith(mes))
+    .sort((x,y) => x.data.localeCompare(y.data));
+  const esc = (v) => `"${String(v).replaceAll('"','""')}"`;
+  const cab = ["Data","Servidor","Processo","Atividade","Complexidade",
+               "Pontuação","Observações","Abono","Aprovado pela chefia"];
+  const linhas = regs.map(r => [
+    fmtData(r.data), r.servidor, r.processo, r.atividade,
+    ROTULO_COMPLEXIDADE[r.complexidade], r.pontos, r.obs,
+    r.abono ? "Sim" : "Não", r.aprovado ? "Sim" : "Não"
+  ].map(esc).join(";"));
+  baixar(`registro-${ident.unidade}-${mes}.csv`,
+         "\uFEFF" + cab.map(esc).join(";") + "\r\n" + linhas.join("\r\n"),
+         "text/csv;charset=utf-8");
+});
+$("btnBackup").addEventListener("click", () =>
+  baixar(`backup-registros-${hoje()}.json`,
+         JSON.stringify(lerRegistros(), null, 2), "application/json"));
+$("btnImportar").addEventListener("click", () => $("fileImport").click());
+$("fileImport").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const novos = JSON.parse(await f.text());
+    if (!Array.isArray(novos)) throw 0;
+    const regs = lerRegistros();
+    const ids = new Set(regs.map(r => r.id));
+    let n = 0;
+    for (const r of novos) if (r && r.id && !ids.has(r.id)){ regs.push(r); n++; }
+    gravarRegistros(regs); render();
+    mostrarAviso(`${n} lançamento(s) importado(s).`);
+  } catch { mostrarAviso("Arquivo inválido: envie um backup JSON gerado pelo aplicativo.", true); }
+  e.target.value = "";
+});
+
+/* ---------- Inicialização ---------- */
+const hoje = () => new Date().toLocaleDateString("sv");  // aaaa-mm-dd local
+montarUnidades();
+montarProcessos();
+$("inpData").value = hoje();
+try {
+  const salvo = JSON.parse(localStorage.getItem(CHAVE_ID));
+  if (salvo && UNIDADES[salvo.unidade]){
+    selUnidade.value = salvo.unidade; montarServidores();
+    if (UNIDADES[salvo.unidade].includes(salvo.servidor)) selServidor.value = salvo.servidor;
+  }
+} catch {}
+
+/* ---------- PWA ---------- */
+if ("serviceWorker" in navigator && location.protocol.startsWith("http"))
+  navigator.serviceWorker.register("sw.js");
+</script>
+</body>
+</html>

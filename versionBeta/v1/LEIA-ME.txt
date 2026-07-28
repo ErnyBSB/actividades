@@ -1,0 +1,64 @@
+REGISTRO DE ATIVIDADES — COBIB (protótipo PWA)
+==============================================
+
+O que é
+-------
+Formulário HTML5 que substitui a planilha de registro diário de
+atividades. Funciona inteiramente no navegador, sem servidor de
+aplicação e sem banco de dados remoto. Os lançamentos ficam gravados
+no próprio navegador (localStorage) e podem ser exportados em CSV
+(para consolidação em Excel) ou JSON (backup/transferência).
+
+Arquivos
+--------
+index.html            aplicativo (formulário, totais, exportações)
+catalogo.js           unidades, servidores, processos, atividades e
+                      complexidades permitidas — edite aqui para
+                      atualizar o catálogo
+manifest.webmanifest  metadados do PWA (nome, ícones, cores)
+sw.js                 service worker (funcionamento offline)
+icons/                ícones do aplicativo
+
+Como executar
+-------------
+1) Teste rápido: dê duplo clique em index.html. Todo o formulário
+   funciona; apenas os recursos de PWA (instalação e offline) ficam
+   inativos, porque navegadores só registram service worker via
+   HTTP(S) ou localhost.
+
+2) Como PWA completo, sirva a pasta por HTTP. Exemplos:
+   - Python:  python -m http.server 8080   (acesse http://localhost:8080)
+   - Node:    npx serve .
+   - Ou publique a pasta em qualquer servidor de arquivos interno /
+     intranet que responda por HTTPS.
+   No Chrome/Edge aparecerá o botão "Instalar" na barra de endereço;
+   depois de instalado, o aplicativo abre em janela própria e
+   funciona sem rede.
+
+Ao atualizar qualquer arquivo, incremente a constante VERSAO em sw.js
+para que os navegadores instalados baixem a nova versão.
+
+Fluxo de uso
+------------
+1. Identificação: unidade → servidor (fica memorizada para a próxima
+   sessão).
+2. Lançamento: data, processo, atividade, complexidade (o formulário
+   habilita apenas as complexidades previstas para a atividade;
+   baixa=5, média=10, alta=15), observações e abono.
+3. Tabela com subtotais por dia, total do dia e total do mês,
+   marcação "aprovado pela chefia" e exclusão de lançamentos.
+4. Exportações: CSV do mês da unidade (abre direto no Excel, com
+   acentuação correta) e backup/importação JSON — a importação
+   mescla sem duplicar, o que permite consolidar os arquivos de
+   vários servidores em uma única máquina.
+
+Limitações do protótipo
+-----------------------
+- Dados presos ao navegador/máquina: limpar dados de navegação apaga
+  os lançamentos (use o backup JSON periodicamente).
+- A marcação "aprovado pela chefia" é apenas um campo, sem controle
+  de perfil/assinatura.
+- Consolidação entre servidores é manual (troca de arquivos JSON/CSV).
+Próximos passos possíveis: migrar para IndexedDB, gravar direto em
+pasta de rede via File System Access API (Chrome/Edge) ou exportar
+no layout exato da planilha oficial (.xlsx) com SheetJS.
