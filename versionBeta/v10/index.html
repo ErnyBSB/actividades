@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registro de Atividades — COBIB</title>
+<meta name="description" content="Registro diário de processos de trabalho e atividades por unidade e servidor, com aprovação em cadeia pelas chefias.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#22352C">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{
+  --tinta:#22352C; --papel:#F5F6F2; --ficha:#FFFFFF;
+  --verde:#2F5D4A; --verde-suave:#E4EEE8;
+  --dourado:#A8852F; --dourado-suave:#F2ECDD;
+  --grafite:#5C6660; --linha:#D6DBD5; --erro:#9C3B31;
+  --raio:6px;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--papel); color:var(--tinta);
+  font-family:var(--sans); font-size:15px; line-height:1.5}
+.wrap{max-width:1020px; margin:0 auto; padding:0 20px 64px}
+
+header{border-bottom:3px double var(--tinta); padding:28px 0 16px; margin-bottom:28px}
+header .eyebrow{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--grafite); margin:0 0 6px}
+header h1{font-family:var(--serif); font-weight:600; font-size:clamp(24px,4vw,32px); margin:0; line-height:1.15}
+header .sub{margin:6px 0 0; color:var(--grafite); font-size:13px}
+.pill{display:inline-block; background:var(--verde-suave); color:var(--verde);
+  border-radius:999px; padding:1px 10px; font-weight:600; margin-left:6px}
+.pill.chefia{background:var(--dourado-suave); color:var(--dourado)}
+
+.card{background:var(--ficha); border:1px solid var(--linha); border-radius:var(--raio);
+  border-left:4px solid var(--dourado); padding:22px; margin-bottom:22px}
+.card h2{font-family:var(--serif); font-size:18px; font-weight:600; margin:0 0 4px}
+.card .hint{margin:0 0 16px; color:var(--grafite); font-size:13px}
+
+label{display:block; font-weight:600; font-size:13px; margin:0 0 4px}
+select,input[type=date],input[type=text],textarea{
+  width:100%; padding:9px 10px; font:inherit; color:var(--tinta);
+  background:#fff; border:1px solid var(--linha); border-radius:var(--raio)}
+select:focus,input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--verde); outline-offset:1px}
+textarea{resize:vertical; min-height:64px}
+.grid{display:grid; gap:14px}
+.grid.c2{grid-template-columns:1fr 1fr}
+.grid.c3{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:720px){.grid.c2,.grid.c3{grid-template-columns:1fr}}
+.campo{margin-bottom:14px}
+
+.chips{display:flex; gap:10px; flex-wrap:wrap}
+.chip{border:1.5px solid var(--linha); background:#fff; border-radius:var(--raio);
+  padding:8px 14px; font:inherit; cursor:pointer; color:var(--grafite);
+  display:flex; flex-direction:column; align-items:center; min-width:88px;
+  transition:border-color .12s, background .12s}
+.chip b{font-size:18px; font-family:var(--serif)}
+.chip small{font-size:11px; letter-spacing:.08em; text-transform:uppercase}
+.chip[aria-pressed=true]{border-color:var(--verde); background:var(--verde-suave); color:var(--verde)}
+.chip:disabled{opacity:.35; cursor:not-allowed}
+
+.acao{background:var(--verde); color:#fff; border:0; border-radius:var(--raio);
+  padding:11px 22px; font:inherit; font-weight:600; cursor:pointer}
+.acao:hover{background:#264b3c}
+.acao.sec{background:#fff; color:var(--verde); border:1.5px solid var(--verde)}
+.acao.sec:hover{background:var(--verde-suave)}
+.acao.mini{padding:6px 12px; font-size:13px; font-weight:500}
+.acao:disabled{opacity:.5; cursor:not-allowed}
+
+.aviso{background:var(--verde-suave); border-radius:var(--raio); color:var(--verde);
+  padding:10px 14px; font-size:13px; margin-top:12px; display:none}
+.aviso.erro{background:#F6E7E4; color:var(--erro)}
+
+.conexao{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+.led{width:10px; height:10px; border-radius:50%; background:var(--erro); flex:none}
+.led.ok{background:var(--verde)}
+#txtConexao{font-size:13px; color:var(--grafite)}
+
+.totais{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px}
+@media(max-width:640px){.totais{grid-template-columns:1fr}}
+.total{background:var(--tinta); color:var(--papel); border-radius:var(--raio); padding:16px 20px}
+.total small{display:block; font-size:11px; letter-spacing:.12em; text-transform:uppercase; opacity:.75}
+.total b{font-family:var(--serif); font-size:30px; font-weight:600}
+
+.filtros{display:flex; gap:12px; align-items:end; flex-wrap:wrap; margin-bottom:14px}
+.filtros .campo{margin:0; min-width:150px}
+.filtros input[type=month]{padding:8px 10px; font:inherit; border:1px solid var(--linha);
+  border-radius:var(--raio); background:#fff; width:100%}
+table{width:100%; border-collapse:collapse; font-size:13.5px}
+th{text-align:left; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--grafite); border-bottom:2px solid var(--tinta); padding:8px 8px}
+td{border-bottom:1px solid var(--linha); padding:9px 8px; vertical-align:top}
+td.num,th.num{text-align:right; font-variant-numeric:tabular-nums}
+tr.subtotal td{background:var(--verde-suave); color:var(--verde); font-weight:600}
+.atv{max-width:340px}
+.excluir{background:none; border:0; color:var(--erro); cursor:pointer; font-size:13px; padding:2px}
+.vazio{color:var(--grafite); text-align:center; padding:28px 0}
+.export{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+.tag-abono{background:var(--dourado-suave); color:var(--dourado); border-radius:999px;
+  padding:0 8px; font-size:11px; font-weight:600}
+.tag-papel{background:var(--papel); color:var(--grafite); border:1px solid var(--linha);
+  border-radius:999px; padding:0 8px; font-size:11px; font-weight:600}
+.st{border-radius:999px; padding:1px 10px; font-size:11px; font-weight:600; white-space:nowrap}
+.st.ap{background:var(--verde-suave); color:var(--verde)}
+.st.pe{background:var(--dourado-suave); color:var(--dourado)}
+
+/* --- Busca de atividade (combobox) --- */
+.busca{position:relative}
+.busca input{padding-right:34px}
+.busca .limpar{position:absolute; right:6px; top:50%; transform:translateY(-50%);
+  background:none; border:0; color:var(--grafite); cursor:pointer; font-size:18px;
+  line-height:1; padding:4px 6px; display:none}
+.busca.tem-texto .limpar{display:block}
+.lista{position:absolute; z-index:20; left:0; right:0; top:calc(100% + 4px);
+  background:#fff; border:1px solid var(--linha); border-radius:var(--raio);
+  box-shadow:0 8px 24px rgba(34,53,44,.14); max-height:340px; overflow-y:auto; display:none}
+.lista[data-aberta=true]{display:block}
+.lista .opt{padding:9px 12px; cursor:pointer; border-bottom:1px solid var(--linha)}
+.lista .opt:last-child{border-bottom:0}
+.lista .opt .t{display:block; font-size:13.5px; line-height:1.4}
+.lista .opt .p{display:block; font-size:11px; letter-spacing:.04em; color:var(--grafite); margin-top:3px}
+.lista .opt mark{background:var(--dourado-suave); color:inherit; font-weight:600; padding:0 1px}
+.lista .opt[aria-selected=true]{background:var(--verde-suave)}
+.lista .nada{padding:16px 12px; color:var(--grafite); font-size:13px; text-align:center}
+.escolhida{background:var(--verde-suave); border-radius:var(--raio); padding:10px 12px;
+  margin-top:8px; display:none}
+.escolhida[data-tem=true]{display:block}
+.escolhida .t{font-size:13.5px; line-height:1.4; color:var(--verde)}
+.escolhida .p{display:block; font-size:11px; letter-spacing:.04em; color:var(--grafite); margin-top:3px}
+
+/* --- Atividades frequentes --- */
+.frequentes{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:6px}
+.freq{border:1.5px solid var(--linha); background:#fff; border-radius:var(--raio);
+  padding:7px 12px; font:inherit; font-size:12.5px; text-align:left; cursor:pointer;
+  color:var(--tinta); max-width:100%; transition:border-color .12s, background .12s}
+.freq:hover{border-color:var(--verde); background:var(--verde-suave)}
+.freq small{display:block; color:var(--grafite); font-size:11px; margin-top:2px}
+
+/* --- Visão gerencial (chefia geral / administrador) --- */
+/* A rampa de complexidade é ORDINAL: um único matiz (azul), do claro
+   ao escuro. Azul não tem uso prévio no aplicativo — o verde e o
+   dourado já significam "aprovado" e "pendente", e reaproveitá-los
+   aqui faria a complexidade ser lida como situação. */
+.vis{--compl-b:#86b6ef; --compl-m:#2a78d6; --compl-a:#104281;
+  margin-bottom:18px}
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px}
+@media(max-width:820px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--papel); border:1px solid var(--linha); border-radius:var(--raio);
+  padding:12px 14px}
+.kpi small{display:block; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--grafite); margin-bottom:2px}
+.kpi b{font-family:var(--serif); font-size:26px; font-weight:600; line-height:1.1}
+.kpi .sufixo{font-family:var(--sans); font-size:13px; font-weight:400; color:var(--grafite)}
+.gfx{margin:0 0 18px; padding:0; border:1px solid var(--linha); border-radius:var(--raio);
+  background:var(--ficha)}
+.gfx figcaption{display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;
+  padding:12px 14px 0; font-weight:600; font-size:13px}
+.gfx .plot{width:100%}
+.gfx .nota{margin:0; padding:0 14px 12px; font-size:12px; color:var(--grafite)}
+.ordenar{margin-left:auto; background:none; border:0; color:var(--verde); cursor:pointer;
+  font:inherit; font-size:12px; font-weight:600; text-decoration:underline; padding:0}
+
+.resumo{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px}
+.resumo .srv{background:var(--papel); border:1px solid var(--linha); border-radius:var(--raio);
+  padding:8px 14px; font-size:13px}
+.resumo .srv b{font-family:var(--serif); font-size:16px}
+.resumo .srv small{color:var(--grafite)}
+
+@media(max-width:760px){.esconde-m{display:none}.atv{max-width:none}}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">COBIB · Registro diário de produção</p>
+  <h1>Registro de Atividades</h1>
+  <p class="sub" id="idAtual">Ninguém identificado</p>
+</header>
+
+<!-- ETAPA 1 — Pasta da rede -->
+<section class="card" id="cardPasta">
+  <h2>1 · Pasta da rede</h2>
+  <p class="hint">Conecte a pasta central <b id="txtCaminho"></b>. Somente pastas oficializadas pelo administrador são aceitas; a escolha fica memorizada neste computador.</p>
+  <div class="conexao">
+    <span class="led" id="led"></span>
+    <span id="txtConexao">Pasta não conectada</span>
+    <button class="acao sec mini" id="btnPasta">Conectar pasta</button>
+    <button class="acao sec mini" id="btnAtualizar" hidden>Atualizar dados da rede</button>
+  </div>
+  <div class="aviso" id="avisoPasta" role="alert"></div>
+</section>
+
+<!-- ETAPA 2 — Identificação -->
+<section class="card" id="cardIdent" hidden>
+  <h2>2 · Identificação</h2>
+  <div id="linhaPessoa">
+    <p class="hint">Escolha o seu nome. O papel (servidor, chefia da unidade, chefia geral ou administrador) e a unidade de trabalho vêm pré-definidos da configuração — quem aprova quem é determinado pelo papel, não pela tela.</p>
+    <div class="grid c2">
+      <div class="campo">
+        <label for="selPessoa">Quem é você?</label>
+        <select id="selPessoa"></select>
+      </div>
+      <div class="campo" id="cSenha" hidden>
+        <label for="inpSenha">Senha</label>
+        <input type="password" id="inpSenha" autocomplete="current-password">
+      </div>
+    </div>
+    <button class="acao" id="btnIniciar">Confirmar identidade</button>
+  </div>
+  <div id="resumoIdent" hidden>
+    <p class="hint" style="margin:0 0 12px">Identidade confirmada e travada para esta sessão.</p>
+    <button class="acao sec mini" id="btnTrocar">Trocar identidade</button>
+  </div>
+  <div class="aviso" id="avisoIdent" role="alert"></div>
+</section>
+
+<!-- Painel de administração (perfil adm) -->
+<section class="card" id="cardAdm" hidden>
+  <h2>Administração</h2>
+  <p class="hint">Alterações feitas aqui são gravadas no config.json da pasta central e valem para todos imediatamente (ao recarregarem os dados). Os processos e atividades permanecem no arquivo catalogo.js do aplicativo.</p>
+
+  <h3 style="font-family:var(--serif);font-size:15px;margin:18px 0 6px">Pasta oficial</h3>
+  <p class="hint" id="infoInstalacao">—</p>
+
+  <h3 style="font-family:var(--serif);font-size:15px;margin:18px 0 6px">Senhas</h3>
+  <label style="font-weight:400;display:flex;gap:8px;align-items:center;margin-bottom:10px">
+    <input type="checkbox" id="chkExigirSenha"> Exigir senha de todas as pessoas (bloqueia quem não tiver senha definida)
+  </label>
+  <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Pessoa</th><th>Papel · Unidade</th><th>Senha</th><th></th></tr></thead>
+      <tbody id="tbodySenhas"></tbody>
+    </table>
+  </div>
+
+  <h3 style="font-family:var(--serif);font-size:15px;margin:22px 0 6px">Catálogo de unidades e pessoas</h3>
+  <p class="hint">Edite o JSON abaixo (unidades, chefias, servidores e chefia geral) e salve. Atenção: renomear uma pessoa desvincula a senha e o arquivo de lançamentos do nome antigo.</p>
+  <div class="campo">
+    <textarea id="txtCatalogo" spellcheck="false"
+      style="font-family:ui-monospace,Consolas,monospace;font-size:13px;min-height:220px"></textarea>
+  </div>
+  <button class="acao" id="btnSalvarCatalogo">Salvar catálogo</button>
+  <div class="aviso" id="avisoAdm" role="status"></div>
+</section>
+
+<!-- ETAPA 3 — Lançamento (todos os perfis) -->
+<section class="card" id="cardForm" hidden>
+  <h2>3 · Novo lançamento</h2>
+  <p class="hint" id="hintForm"></p>
+
+  <div class="grid c2">
+    <div class="campo">
+      <label for="inpData">Data</label>
+      <input type="date" id="inpData">
+    </div>
+    <div class="campo">
+      <label style="margin-bottom:10px">Abono</label>
+      <label style="font-weight:400; display:flex; gap:8px; align-items:center">
+        <input type="checkbox" id="chkAbono"> Lançamento referente a abono
+      </label>
+    </div>
+  </div>
+
+  <div class="campo" id="campoFrequentes" hidden>
+    <label>Atividades frequentes <span style="font-weight:400;color:var(--grafite)">(as suas mais registradas)</span></label>
+    <div class="frequentes" id="frequentes"></div>
+  </div>
+
+  <div class="campo">
+    <label for="inpAtividade">Atividade</label>
+    <div class="busca" id="busca">
+      <input type="text" id="inpAtividade" autocomplete="off" role="combobox"
+             aria-expanded="false" aria-controls="listaAtividades" aria-autocomplete="list"
+             placeholder="Digite parte da atividade — ex.: catalogar, acervo, evento">
+      <button type="button" class="limpar" id="btnLimparBusca" aria-label="Limpar busca">&times;</button>
+      <div class="lista" id="listaAtividades" role="listbox" data-aberta="false"></div>
+    </div>
+    <div class="escolhida" id="atvEscolhida" data-tem="false" aria-live="polite"></div>
+    <p class="hint" style="margin:8px 0 0">
+      Deixe o campo vazio e clique para ver todas as <span id="qtdAtividades">…</span> atividades, ou
+      <button type="button" class="acao mini sec" id="btnFiltrarProc" style="padding:2px 8px">filtrar por processo</button>
+    </p>
+    <div id="campoProcesso" hidden style="margin-top:10px">
+      <label for="selProcesso">Processo de trabalho</label>
+      <select id="selProcesso"></select>
+    </div>
+  </div>
+  <div class="campo">
+    <label>Complexidade e pontuação</label>
+    <div class="chips" id="chips" role="group" aria-label="Complexidade">
+      <button type="button" class="chip" data-c="b" aria-pressed="false"><b>5</b><small>Baixa</small></button>
+      <button type="button" class="chip" data-c="m" aria-pressed="false"><b>10</b><small>Média</small></button>
+      <button type="button" class="chip" data-c="a" aria-pressed="false"><b>15</b><small>Alta</small></button>
+    </div>
+  </div>
+  <div class="campo">
+    <label for="inpObs">Observações <span style="font-weight:400;color:var(--grafite)">(opcional)</span></label>
+    <textarea id="inpObs" placeholder="Detalhes do trabalho realizado"></textarea>
+  </div>
+  <button class="acao" id="btnRegistrar">Registrar atividade</button>
+  <div class="aviso" id="aviso" role="status"></div>
+</section>
+
+<!-- Totais pessoais -->
+<div class="totais" id="totaisPessoais" hidden>
+  <div class="total"><small>Meu total no dia selecionado</small><b id="totDia">0</b></div>
+  <div class="total"><small>Meu total no mês</small><b id="totMes">0</b></div>
+</div>
+
+<!-- Painel de lançamentos -->
+<section class="card" id="cardPainel" hidden style="border-left-color:var(--verde)">
+  <h2 id="tituloPainel">Lançamentos</h2>
+  <p class="hint" id="hintPainel"></p>
+
+  <div class="filtros">
+    <div class="campo" id="fUnidadeGeral" hidden>
+      <label for="selUnidadeVer">Unidade</label>
+      <select id="selUnidadeVer"></select>
+    </div>
+    <div class="campo">
+      <label for="inpMes">Mês de referência</label>
+      <input type="month" id="inpMes">
+    </div>
+    <div class="campo" id="fServidor" hidden>
+      <label for="selServidorVer">Pessoa</label>
+      <select id="selServidorVer"></select>
+    </div>
+    <div class="campo" id="fSituacao" hidden>
+      <label for="selSituacao">Situação</label>
+      <select id="selSituacao">
+        <option value="">Todas</option>
+        <option value="pe">Pendentes</option>
+        <option value="ap">Aprovados</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Visão gerencial: só para chefia geral e administrador.
+       Fica DEPOIS dos filtros de propósito — tudo o que é desenhado
+       aqui obedece ao mês, à unidade, à pessoa e à situação acima. -->
+  <div class="vis" id="vis" hidden>
+    <div class="kpis">
+      <div class="kpi"><small>Lançamentos no mês</small><b id="kpiLanc">0</b></div>
+      <div class="kpi"><small>Pontos no mês</small><b id="kpiPontos">0</b></div>
+      <div class="kpi"><small>Aprovados</small><b id="kpiAprov">0<span class="sufixo">%</span></b></div>
+      <div class="kpi"><small>Pendentes</small><b id="kpiPend">0</b></div>
+    </div>
+
+    <figure class="gfx">
+      <figcaption>
+        <span>Atividades por pessoa e complexidade</span>
+        <button class="ordenar" id="btnOrdem" type="button">ordenar por volume</button>
+      </figcaption>
+      <div class="plot" id="chartPessoas" role="img"
+           aria-label="Gráfico de barras empilhadas: número de atividades por pessoa, dividido por complexidade. Os mesmos números estão na tabela abaixo."></div>
+      <p class="nota" id="notaPessoas"></p>
+    </figure>
+
+    <figure class="gfx" id="figUnidades">
+      <figcaption><span>Atividades por unidade e complexidade</span></figcaption>
+      <div class="plot" id="chartUnidades" role="img"
+           aria-label="Mapa de calor: número de atividades por unidade e nível de complexidade. Os mesmos números estão na tabela abaixo."></div>
+      <p class="nota">Quanto mais escura a célula, maior o número de atividades. O número aparece dentro de cada célula.</p>
+    </figure>
+  </div>
+
+  <div class="resumo" id="resumo" hidden></div>
+
+  <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th id="thServidor">Pessoa</th>
+          <th class="atv">Atividade</th>
+          <th class="esconde-m">Compl.</th>
+          <th class="num">Pontos</th>
+          <th>Situação</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <p class="vazio" id="vazio">Nenhum lançamento com os filtros atuais.</p>
+  </div>
+
+  <div class="export">
+    <button class="acao mini" id="btnAprovarTodos" hidden>Aprovar todos os pendentes sob minha alçada</button>
+    <button class="acao sec mini" id="btnCSV">Exportar CSV da visão atual</button>
+  </div>
+  <div class="aviso" id="avisoPainel" role="status"></div>
+</section>
+
+</div>
+
+<script src="catalogo.js"></script>
+<script src="rede.js"></script>
+<!-- Build próprio do ECharts (só barra, mapa de calor, eixo, dica e legenda):
+     521 KB contra 1 MB do pacote completo. Fica NA PASTA do aplicativo, nunca
+     em CDN — o service worker é cache-first e a máquina pode estar sem
+     internet. Ao trocar por uma versão nova, altere VERSAO no sw.js. -->
+<script src="echarts.min.js"></script>
+
+<script>
+"use strict";
+/* =============================== ESTADO =============================== */
+const CHAVE_ID = "ra.identificacao.v4";
+const GERAL = "GERAL";
+const ADM_NOME = "Administrador";
+const ADM_SENHA_INICIAL = "adm";
+let ident = null;
+let dirRaiz = null;
+let complexidade = null;
+let dados = { registros: [], aprovU: {}, aprovG: {} };
+const CHAVE_INST = "ra.instalacao.v1";
+let situacaoPasta = null;  // "oficial" | "nao-oficializada" | "divergente"
+/* Configuração em vigor: começa pela semente do catalogo.js e é
+   substituída pelo config.json da pasta central ao conectar. */
+let CFG = {
+  unidades: UNIDADES,
+  chefiaGeral: (typeof CHEFIA_GERAL !== "undefined" ? CHEFIA_GERAL : null),
+  senhas: (typeof SENHAS !== "undefined" ? SENHAS : {}),
+  exigirSenha: (typeof EXIGIR_SENHA !== "undefined" ? EXIGIR_SENHA : false)
+};
+
+const $ = (id) => document.getElementById(id);
+const chips = [...document.querySelectorAll("#chips .chip")];
+const fmtData = (iso) => iso.split("-").reverse().join("/");
+const hoje = () => new Date().toLocaleDateString("sv");
+const ehServidor = () => ident?.perfil === "servidor";
+const ehChefia   = () => ident?.perfil === "chefia";
+const ehGeral    = () => ident?.perfil === "geral";
+const ehAdm      = () => ident?.perfil === "adm";
+const servidoresDe = (u) => (CFG.unidades[u]?.servidores) || [];
+const papelDe = (r) => r.papel || "servidor";
+const aprovacaoDe = (r) =>
+  papelDe(r) === "servidor" ? dados.aprovU[r.id] : dados.aprovG[r.id];
+const podeAprovar = (r) =>
+  (ehChefia() && papelDe(r) === "servidor" && r.unidade === ident.unidade) ||
+  (ehGeral() && papelDe(r) !== "servidor");
+const ehMeu = (r) => ident && r.servidor === ident.nome && papelDe(r) === ident.perfil;
+
+function avisar(el, msg, erro = false) {
+  el.textContent = msg;
+  el.className = "aviso" + (erro ? " erro" : "");
+  el.style.display = "block";
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = "none"; }, 6000);
+}
+async function sha256hex(txt) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+/* ============================ PASTA DA REDE ============================ */
+function estadoConexao(ok, txt) {
+  $("led").className = "led" + (ok ? " ok" : "");
+  $("txtConexao").textContent = txt;
+  $("btnAtualizar").hidden = !ok;
+  $("btnPasta").textContent = ok ? "Trocar pasta" : "Conectar pasta";
+}
+async function conectarSilencioso() {
+  if (!("showDirectoryPicker" in window))
+    return avisar($("avisoPasta"),
+      "Este navegador não oferece acesso a pastas. Use Chrome ou Edge.", true);
+  const salvo = await obterHandleRaiz();
+  if (salvo && await garantirPermissao(salvo, "readwrite", false)) {
+    dirRaiz = salvo;
+    estadoConexao(true, `Conectado a “${salvo.name}”`);
+    await aposConectar();
+  } else if (salvo) {
+    estadoConexao(false, `Pasta “${salvo.name}” memorizada — clique para reconectar`);
+    $("btnPasta").textContent = "Reconectar pasta";
+  }
+}
+$("btnPasta").addEventListener("click", async () => {
+  try {
+    let handle = null;
+    const salvo = await obterHandleRaiz();
+    if (salvo && $("btnPasta").textContent === "Reconectar pasta" &&
+        await garantirPermissao(salvo, "readwrite")) {
+      handle = salvo;
+    } else {
+      handle = await showDirectoryPicker({ id: "unidadeCentral", mode: "readwrite" });
+      await salvarHandleRaiz(handle);
+    }
+    dirRaiz = handle;
+    estadoConexao(true, `Conectado a “${handle.name}”`);
+    await aposConectar();
+  } catch (e) {
+    if (e && e.name !== "AbortError")
+      avisar($("avisoPasta"), "Não foi possível acessar a pasta: " + e.message, true);
+  }
+});
+$("btnAtualizar").addEventListener("click", aposConectar);
+
+async function aposConectar() {
+  await carregarConfig();
+  // valida o selo de instalação da pasta
+  const idLocal = localStorage.getItem(CHAVE_INST);
+  if (CFG.instalacao) {
+    if (idLocal && idLocal !== CFG.instalacao.id) situacaoPasta = "divergente";
+    else {
+      situacaoPasta = "oficial";
+      localStorage.setItem(CHAVE_INST, CFG.instalacao.id);
+    }
+  } else situacaoPasta = "nao-oficializada";
+  montarPessoas();
+  $("cardIdent").hidden = false;
+  if (situacaoPasta === "nao-oficializada")
+    avisar($("avisoIdent"),
+      "Esta pasta ainda não foi oficializada. Apenas o Administrador pode se identificar para configurá-la.", true);
+  if (situacaoPasta === "divergente")
+    avisar($("avisoIdent"),
+      "Esta pasta é DIFERENTE da pasta oficial usada anteriormente neste computador. Verifique o caminho; se a mudança for intencional, apenas o Administrador pode confirmá-la.", true);
+  if (situacaoPasta === "oficial") {
+    if (!ident) restaurarIdentidade();
+    else { if (ehAdm()) renderAdm(); await recarregar(); }
+  } else {
+    // identidade anterior não vale numa pasta não validada
+    if (ident && !ehAdm()) limparIdentidade();
+  }
+}
+/* Lê o config.json central; NÃO cria mais automaticamente — a
+   criação/oficialização é ato exclusivo do administrador. */
+async function carregarConfig() {
+  try {
+    const cfg = await lerConfig(dirRaiz);
+    if (cfg && cfg.unidades) {
+      CFG = {
+        unidades: cfg.unidades,
+        chefiaGeral: cfg.chefiaGeral ?? null,
+        senhas: cfg.senhas || {},
+        exigirSenha: Boolean(cfg.exigirSenha),
+        instalacao: cfg.instalacao || null
+      };
+    } else {
+      CFG.instalacao = null; // sem config: pasta virgem
+    }
+  } catch { /* mantém a semente do catalogo.js */ }
+}
+async function oficializarPasta(pessoa) {
+  CFG.instalacao = {
+    id: crypto.randomUUID(),
+    por: pessoa.nome,
+    em: new Date().toISOString()
+  };
+  await gravarConfig(dirRaiz, CFG);
+  localStorage.setItem(CHAVE_INST, CFG.instalacao.id);
+  situacaoPasta = "oficial";
+  montarPessoas();
+}
+
+/* ============================ IDENTIFICAÇÃO ============================ */
+let PESSOAS = [];
+function montarPessoas() {
+  PESSOAS = [];
+  let html = "";
+  PESSOAS.push({ perfil: "adm", unidade: null, nome: ADM_NOME });
+  html += `<optgroup label="Administração">
+    <option value="0">${ADM_NOME}</option></optgroup>`;
+  if (situacaoPasta === "oficial") {
+  if (CFG.chefiaGeral) {
+    PESSOAS.push({ perfil: "geral", unidade: GERAL, nome: CFG.chefiaGeral });
+    html += `<optgroup label="Chefia geral">
+      <option value="${PESSOAS.length - 1}">${CFG.chefiaGeral}</option></optgroup>`;
+  }
+  for (const u of Object.keys(CFG.unidades)) {
+    const grupo = [];
+    if (CFG.unidades[u].chefia) {
+      PESSOAS.push({ perfil: "chefia", unidade: u, nome: CFG.unidades[u].chefia });
+      grupo.push(`<option value="${PESSOAS.length - 1}">${CFG.unidades[u].chefia} — chefia</option>`);
+    }
+    for (const s of servidoresDe(u)) {
+      PESSOAS.push({ perfil: "servidor", unidade: u, nome: s });
+      grupo.push(`<option value="${PESSOAS.length - 1}">${s}</option>`);
+    }
+    if (grupo.length) html += `<optgroup label="${u}">${grupo.join("")}</optgroup>`;
+  }
+  }
+  $("selPessoa").innerHTML = html;
+  aoTrocarPessoa();
+}
+const hashDe = (nome) => CFG.senhas[nome] || null;
+function aoTrocarPessoa() {
+  const p = PESSOAS[+$("selPessoa").value];
+  // o administrador sempre tem senha (a inicial é "adm")
+  $("cSenha").hidden = !(p && (hashDe(p.nome) || p.perfil === "adm"));
+  $("inpSenha").value = "";
+}
+$("selPessoa").addEventListener("change", aoTrocarPessoa);
+
+async function senhaConfere(p, senha) {
+  const hash = hashDe(p.nome);
+  if (hash) return (await sha256hex(p.nome + "|" + senha)) === hash;
+  if (p.perfil === "adm") return senha === ADM_SENHA_INICIAL;
+  return null; // sem senha cadastrada
+}
+$("btnIniciar").addEventListener("click", async () => {
+  const p = PESSOAS[+$("selPessoa").value];
+  if (!p) return avisar($("avisoIdent"),
+    "Nenhuma pessoa cadastrada — o administrador pode preencher o catálogo.", true);
+  const precisaSenha = hashDe(p.nome) || p.perfil === "adm";
+  if (precisaSenha) {
+    const senha = $("inpSenha").value;
+    if (!senha) return avisar($("avisoIdent"), "Informe a senha.", true);
+    if (!(await senhaConfere(p, senha))) {
+      $("inpSenha").value = "";
+      return avisar($("avisoIdent"), "Senha incorreta.", true);
+    }
+  } else if (CFG.exigirSenha) {
+    return avisar($("avisoIdent"),
+      "Senha obrigatória, mas ainda não definida para esta pessoa. Peça ao administrador.", true);
+  }
+  $("inpSenha").value = "";
+  if (p.perfil !== "adm" && situacaoPasta !== "oficial")
+    return avisar($("avisoIdent"),
+      "Somente o Administrador pode entrar antes de a pasta ser validada.", true);
+  if (p.perfil === "adm" && situacaoPasta === "nao-oficializada") {
+    if (!confirm(`Oficializar a pasta conectada como a pasta central do sistema?\nTodas as pessoas passarão a entrar somente por ela.`)) return;
+    try { await oficializarPasta(p); }
+    catch (e) { return avisar($("avisoIdent"), "Não foi possível oficializar (sem escrita na pasta?): " + e.message, true); }
+    avisar($("avisoIdent"), "Pasta oficializada com sucesso.");
+  }
+  if (p.perfil === "adm" && situacaoPasta === "divergente") {
+    if (!confirm("Adotar ESTA pasta como a oficial neste computador, substituindo a anterior?")) return;
+    localStorage.setItem(CHAVE_INST, CFG.instalacao.id);
+    situacaoPasta = "oficial";
+    montarPessoas();
+    $("selPessoa").value = "0";
+  }
+  identificar(p);
+});
+
+function travarIdentidade(travar) {
+  $("linhaPessoa").hidden = travar;
+  $("resumoIdent").hidden = !travar;
+}
+function identificar(pessoa) {
+  ident = { ...pessoa };
+  localStorage.setItem(CHAVE_ID, JSON.stringify(ident));
+  const rot = { servidor: "", chefia: "Chefia", geral: "Chefia geral", adm: "Administrador" }[ident.perfil];
+  $("idAtual").innerHTML = ident.nome +
+    (rot ? ` <span class="pill chefia">${rot}</span>` : "") +
+    (ident.unidade && ident.unidade !== GERAL ? ` <span class="pill">${ident.unidade}</span>` : "");
+  travarIdentidade(true);
+  if (ehAdm()) {
+    $("cardAdm").hidden = false;
+    renderAdm();
+  }
+  prepararPainel();
+  if (dirRaiz) recarregar();
+}
+function restaurarIdentidade() {
+  /* válida apenas se a pessoa ainda existir na configuração central;
+     perfis com senha exigem nova digitação a cada sessão? Não — o
+     travamento vale como "lembrar-me" nesta máquina/navegador. */
+  try {
+    const salvo = JSON.parse(localStorage.getItem(CHAVE_ID));
+    const i = PESSOAS.findIndex(x => salvo &&
+      x.perfil === salvo.perfil && x.unidade === salvo.unidade && x.nome === salvo.nome);
+    if (i >= 0) { $("selPessoa").value = String(i); identificar(PESSOAS[i]); }
+    else localStorage.removeItem(CHAVE_ID);
+  } catch {}
+}
+function limparIdentidade() {
+  ident = null;
+  localStorage.removeItem(CHAVE_ID);
+  dados = { registros: [], aprovU: {}, aprovG: {} };
+  complexidade = null;
+  $("inpAtividade").value = "";
+  $("busca").classList.remove("tem-texto");
+  $("selProcesso").value = ""; $("campoProcesso").hidden = true;
+  $("campoFrequentes").hidden = true; $("frequentes").innerHTML = "";
+  limparEscolha();
+  ["cardForm", "totaisPessoais", "cardPainel", "cardAdm"].forEach(id => $(id).hidden = true);
+  $("vis").hidden = true;
+  gPessoas?.dispose(); gPessoas = null;
+  gUnidades?.dispose(); gUnidades = null;
+  visOrdem = "alfa"; $("btnOrdem").textContent = "ordenar por volume";
+  $("tbody").innerHTML = "";
+  $("selServidorVer").value = "*"; $("selSituacao").value = ""; $("inpMes").value = "";
+  $("idAtual").textContent = "Ninguém identificado";
+  travarIdentidade(false);
+  aoTrocarPessoa();
+}
+$("btnTrocar").addEventListener("click", () => {
+  if (confirm("Trocar de identidade? Os painéis serão fechados e recarregados.")) limparIdentidade();
+});
+
+/* =========================== CARREGAR DADOS =========================== */
+async function recarregar() {
+  if (!dirRaiz || !ident) return;
+  try {
+    dados = { registros: [], aprovU: {}, aprovG: {} };
+    dados.aprovG = await lerAprovacoes(dirRaiz, GERAL);
+    if (ehServidor()) {
+      const meu = await lerMeuArquivo(dirRaiz, ident.unidade, ident.nome);
+      dados.registros = (meu && meu.registros) || [];
+      dados.aprovU = await lerAprovacoes(dirRaiz, ident.unidade);
+    } else if (ehChefia()) {
+      dados.registros = await lerLancamentosDaUnidade(dirRaiz, ident.unidade);
+      dados.aprovU = await lerAprovacoes(dirRaiz, ident.unidade);
+    } else { // chefia geral e administrador: visão ampla
+      const sel = $("selUnidadeVer").value || "*";
+      const unidades = sel === "*" ? [...Object.keys(CFG.unidades), GERAL] : [sel];
+      for (const un of unidades) {
+        dados.registros.push(...await lerLancamentosDaUnidade(dirRaiz, un));
+        if (un !== GERAL)
+          Object.assign(dados.aprovU, await lerAprovacoes(dirRaiz, un));
+      }
+    }
+    if (!ehAdm()) {
+      $("cardForm").hidden = false;
+      $("totaisPessoais").hidden = false;
+    }
+    $("cardPainel").hidden = false;
+    render();
+  } catch (e) {
+    avisar($("avisoPasta"), "Falha ao ler a pasta da rede: " + e.message, true);
+  }
+}
+
+/* ============================ FORMULÁRIO ============================ */
+/* Catálogo achatado: a busca percorre TODAS as atividades de uma vez,
+   sem exigir que a pessoa acerte antes o processo de trabalho.
+   "n" é a forma normalizada (sem acento, minúscula) usada na comparação. */
+function normalizar(s) {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+function palavras(s) {
+  return normalizar(s).split(/[^a-z0-9]+/).filter(w => w.length > 2);
+}
+/* Radical aproximado do português: o catálogo é escrito com
+   substantivos ("catalogação", "indexação") e as pessoas digitam
+   verbos ("catalogar", "indexar"). Sem isto a busca não encontra nada.
+   Recall importa mais que precisão aqui — a lista é curta. */
+const SUFIXOS = ["acoes", "acao", "icoes", "icao", "coes", "cao",
+  "imentos", "imento", "mentos", "mento", "ncias", "ncia",
+  "adores", "ador", "antes", "ante", "ivos", "ivo", "ados", "adas",
+  "ado", "ada", "agem", "ares", "ar", "er", "ir",
+  "ais", "eis", "ois", "ns", "os", "as", "es", "s"];
+const TROCA = { ais: "al", eis: "el", ois: "ol", ns: "m" };
+function radical(w) {
+  if (w.length < 4) return w;
+  for (const s of SUFIXOS) {
+    /* mantém pelo menos 3 letras de base: evita reduzir "doação" a "d" */
+    if (w.length - s.length >= 3 && w.endsWith(s)) {
+      const base = w.slice(0, w.length - s.length);
+      return TROCA[s] ? base + TROCA[s] : base;
+    }
+  }
+  return w;
+}
+/* Casa por substring literal (o que a pessoa vê) ou por radical. */
+function casa(a, termo) {
+  if (a.n.includes(termo)) return true;
+  const r = radical(termo);
+  return a.st.some(w => w.startsWith(r));
+}
+/* Catálogo achatado: a busca percorre TODAS as atividades de uma vez,
+   sem exigir que a pessoa acerte antes o processo de trabalho.
+   "n" é o texto normalizado; "st" são os radicais das suas palavras.
+   Declarado depois de radical()/SUFIXOS porque é avaliado na carga. */
+const ATIVIDADES = PROCESSOS.flatMap((p, pi) =>
+  p.atividades.map((a, ai) => ({
+    pi, ai, proc: p.nome, t: a.t, c: a.c,
+    n: normalizar(a.t + " " + p.nome),
+    st: [...new Set(palavras(a.t + " " + p.nome).map(radical))]
+  }))
+);
+function escapar(s) {
+  return s.replace(/[&<>"]/g, (ch) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+}
+/* Realça os termos buscados no texto já escapado. */
+function realcar(texto, termos) {
+  let html = escapar(texto);
+  if (!termos.length) return html;
+  const alvo = normalizar(texto);
+  const faixas = [];
+  for (const termo of termos) {
+    let de = alvo.indexOf(termo);
+    while (de !== -1) { faixas.push([de, de + termo.length]); de = alvo.indexOf(termo, de + 1); }
+  }
+  if (!faixas.length) return html;
+  faixas.sort((x, y) => x[0] - y[0]);
+  const juntas = [];
+  for (const f of faixas) {
+    const ult = juntas[juntas.length - 1];
+    if (ult && f[0] <= ult[1]) ult[1] = Math.max(ult[1], f[1]);
+    else juntas.push([...f]);
+  }
+  html = "";
+  let cursor = 0;
+  for (const [de, ate] of juntas) {
+    html += escapar(texto.slice(cursor, de)) + "<mark>" + escapar(texto.slice(de, ate)) + "</mark>";
+    cursor = ate;
+  }
+  return html + escapar(texto.slice(cursor));
+}
+
+let atvSel = null;      // atividade escolhida (objeto de ATIVIDADES)
+let opcoes = [];        // opções atualmente listadas
+let marcada = -1;       // índice destacado pelo teclado
+
+function montarProcessos() {
+  $("qtdAtividades").textContent = ATIVIDADES.length;
+  $("selProcesso").innerHTML =
+    `<option value="">Todos os processos</option>` +
+    PROCESSOS.map((p, i) => `<option value="${i}">${p.nome}</option>`).join("");
+  atualizarChips();
+}
+/* Filtra por todos os termos digitados (ordem livre) e pelo processo,
+   quando o filtro opcional de processo estiver em uso. */
+function filtrar() {
+  const termos = normalizar($("inpAtividade").value).split(/\s+/).filter(Boolean);
+  const proc = $("selProcesso").value;
+  return ATIVIDADES.filter(a =>
+    (proc === "" || a.pi === +proc) && termos.every(t => casa(a, t)));
+}
+function abrirLista(mostrarTudo = false) {
+  const termos = normalizar($("inpAtividade").value).split(/\s+/).filter(Boolean);
+  opcoes = filtrar();
+  marcada = opcoes.length ? 0 : -1;
+  const lista = $("listaAtividades");
+  lista.innerHTML = opcoes.length
+    ? opcoes.map((a, i) => `
+        <div class="opt" role="option" id="opt-${i}" data-i="${i}"
+             aria-selected="${i === marcada}">
+          <span class="t">${realcar(a.t, termos)}</span>
+          <span class="p">${realcar(a.proc, termos)}</span>
+        </div>`).join("")
+    : `<div class="nada">Nenhuma atividade encontrada. Tente outra palavra.</div>`;
+  if (!mostrarTudo && !termos.length && !opcoes.length) return fecharLista();
+  lista.dataset.aberta = "true";
+  $("inpAtividade").setAttribute("aria-expanded", "true");
+  rolarAteMarcada();
+}
+function fecharLista() {
+  $("listaAtividades").dataset.aberta = "false";
+  $("inpAtividade").setAttribute("aria-expanded", "false");
+  $("inpAtividade").removeAttribute("aria-activedescendant");
+}
+function marcar(i) {
+  if (!opcoes.length) return;
+  marcada = (i + opcoes.length) % opcoes.length;
+  [...$("listaAtividades").children].forEach((el, k) =>
+    el.setAttribute("aria-selected", String(k === marcada)));
+  $("inpAtividade").setAttribute("aria-activedescendant", "opt-" + marcada);
+  rolarAteMarcada();
+}
+function rolarAteMarcada() {
+  const el = $("listaAtividades").querySelector('[aria-selected="true"]');
+  if (el && el.scrollIntoView) el.scrollIntoView({ block: "nearest" });
+}
+/* Confirma a escolha: mostra o texto INTEGRAL da atividade (o motivo
+   pelo qual o <select> era ruim) e libera as complexidades válidas. */
+function escolher(a) {
+  atvSel = a;
+  $("inpAtividade").value = "";
+  $("busca").classList.remove("tem-texto");
+  $("atvEscolhida").dataset.tem = "true";
+  $("atvEscolhida").innerHTML =
+    `<span class="t">${escapar(a.t)}</span><span class="p">${escapar(a.proc)}</span>`;
+  fecharLista();
+  atualizarChips();
+}
+function limparEscolha() {
+  atvSel = null;
+  $("atvEscolhida").dataset.tem = "false";
+  $("atvEscolhida").innerHTML = "";
+  atualizarChips();
+}
+function atualizarChips() {
+  complexidade = null;
+  const permitidas = atvSel ? atvSel.c : [];
+  chips.forEach(ch => {
+    ch.disabled = !permitidas.includes(ch.dataset.c);
+    ch.setAttribute("aria-pressed", "false");
+  });
+  if (permitidas.length === 1) selecionarChip(permitidas[0]);
+}
+function selecionarChip(c) {
+  complexidade = c;
+  chips.forEach(ch => ch.setAttribute("aria-pressed", String(ch.dataset.c === c)));
+}
+chips.forEach(ch => ch.addEventListener("click", () => selecionarChip(ch.dataset.c)));
+
+/* ---- Eventos da busca ---- */
+$("inpAtividade").addEventListener("input", () => {
+  $("busca").classList.toggle("tem-texto", $("inpAtividade").value !== "");
+  abrirLista(true);
+});
+$("inpAtividade").addEventListener("focus", () => abrirLista(true));
+$("inpAtividade").addEventListener("keydown", (e) => {
+  const aberta = $("listaAtividades").dataset.aberta === "true";
+  if (e.key === "ArrowDown")      { e.preventDefault(); aberta ? marcar(marcada + 1) : abrirLista(true); }
+  else if (e.key === "ArrowUp")   { e.preventDefault(); if (aberta) marcar(marcada - 1); }
+  else if (e.key === "Enter")     { if (aberta && opcoes[marcada]) { e.preventDefault(); escolher(opcoes[marcada]); } }
+  else if (e.key === "Escape")    { fecharLista(); }
+});
+$("listaAtividades").addEventListener("mousedown", (e) => {
+  const opt = e.target.closest(".opt");
+  if (opt) { e.preventDefault(); escolher(opcoes[+opt.dataset.i]); }
+});
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("#busca")) fecharLista();
+});
+$("btnLimparBusca").addEventListener("click", () => {
+  $("inpAtividade").value = "";
+  $("busca").classList.remove("tem-texto");
+  limparEscolha();
+  $("inpAtividade").focus();
+});
+$("btnFiltrarProc").addEventListener("click", () => {
+  const campo = $("campoProcesso");
+  campo.hidden = !campo.hidden;
+  if (campo.hidden) { $("selProcesso").value = ""; }
+  else $("selProcesso").focus();
+});
+$("selProcesso").addEventListener("change", () => abrirLista(true));
+
+/* ---- Atividades frequentes: derivadas dos próprios lançamentos ---- */
+/* Para quem repete as mesmas tarefas todo dia, registrar vira dois
+   cliques. A lista sai do histórico da pessoa — nada a configurar. */
+function montarFrequentes() {
+  const meus = dados.registros.filter(r => r.servidor === ident?.nome);
+  const contagem = new Map();
+  for (const r of meus) contagem.set(r.atividade, (contagem.get(r.atividade) || 0) + 1);
+  const top = [...contagem.entries()]
+    .sort((x, y) => y[1] - x[1])
+    .slice(0, 5)
+    .map(([texto, n]) => ({ a: ATIVIDADES.find(x => x.t === texto), n }))
+    .filter(x => x.a);   // ignora atividades saídas do catálogo
+  $("campoFrequentes").hidden = top.length === 0;
+  $("frequentes").innerHTML = top.map(({ a, n }, i) => `
+    <button type="button" class="freq" data-i="${i}" title="${escapar(a.t)}">
+      ${escapar(a.t.length > 68 ? a.t.slice(0, 68).trim() + "…" : a.t)}
+      <small>${a.proc} · ${n} ${n === 1 ? "registro" : "registros"}</small>
+    </button>`).join("");
+  $("frequentes").dataset.mapa = JSON.stringify(top.map(x => ATIVIDADES.indexOf(x.a)));
+}
+$("frequentes").addEventListener("click", (e) => {
+  const btn = e.target.closest(".freq");
+  if (!btn) return;
+  const mapa = JSON.parse($("frequentes").dataset.mapa || "[]");
+  const a = ATIVIDADES[mapa[+btn.dataset.i]];
+  if (a) { escolher(a); $("inpAtividade").blur(); }
+});
+
+$("btnRegistrar").addEventListener("click", async () => {
+  if (!dirRaiz) return avisar($("aviso"), "Conecte a pasta da rede antes de registrar.", true);
+  const data = $("inpData").value;
+  if (!data) return avisar($("aviso"), "Informe a data do lançamento.", true);
+  if (!atvSel) return avisar($("aviso"), "Escolha a atividade realizada.", true);
+  if (!complexidade) return avisar($("aviso"), "Escolha a complexidade da atividade.", true);
+  const reg = {
+    id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+    data, unidade: ident.unidade, servidor: ident.nome, papel: ident.perfil,
+    processo: atvSel.proc, atividade: atvSel.t,
+    complexidade, pontos: PONTOS[complexidade],
+    obs: $("inpObs").value.trim(),
+    abono: $("chkAbono").checked
+  };
+  try {
+    const atual = await lerMeuArquivo(dirRaiz, ident.unidade, ident.nome);
+    const regs = (atual && atual.registros) || [];
+    regs.push(reg);
+    await gravarMeuArquivo(dirRaiz, ident.unidade, ident.nome, regs);
+    $("inpObs").value = ""; $("chkAbono").checked = false;
+    $("inpMes").value = data.slice(0, 7);
+    avisar($("aviso"), `Atividade registrada — ${reg.pontos} pontos em ${fmtData(data)}.`);
+    await recarregar();
+  } catch (e) {
+    avisar($("aviso"), "Não foi possível gravar na rede: " + e.message, true);
+  }
+});
+
+/* ============================ PAINEL / TABELA ============================ */
+function prepararPainel() {
+  const amplo = ehGeral() || ehAdm();
+  $("fSituacao").hidden = ehServidor();
+  $("fServidor").hidden = ehServidor();
+  $("fUnidadeGeral").hidden = !amplo;
+  $("btnAprovarTodos").hidden = !(ehChefia() || ehGeral());
+  $("thServidor").classList.toggle("esconde-m", ehServidor());
+  $("resumo").hidden = ehServidor();
+  if (amplo) {
+    $("selUnidadeVer").innerHTML =
+      `<option value="*">Todas as unidades</option>` +
+      `<option value="${GERAL}">${GERAL} (chefia geral)</option>` +
+      Object.keys(CFG.unidades).map(u => `<option value="${u}">${u}</option>`).join("");
+  }
+  $("hintForm").textContent =
+    ehServidor() ? "Registre a atividade realizada. A aprovação é feita pela chefia da unidade." :
+    ehChefia()   ? "Seus lançamentos como chefia são aprovados pela chefia geral." :
+                   "Seus lançamentos ficam na pasta GERAL e são aprovados por você no painel abaixo.";
+  $("tituloPainel").textContent =
+    ehServidor() ? "Meus lançamentos" :
+    ehChefia()   ? `Lançamentos da unidade ${ident.unidade}` :
+    ehGeral()    ? "Painel geral" : "Lançamentos (administração)";
+  $("hintPainel").textContent =
+    ehServidor() ? "A situação é definida pela chefia da unidade." :
+    ehChefia()   ? "Você aprova os lançamentos dos servidores da unidade; os seus próprios aguardam a chefia geral." :
+    ehGeral()    ? "Você aprova os lançamentos das chefias de unidade e os seus próprios. Os lançamentos dos servidores são aprovados nas unidades (somente visualização)." :
+                   "Como administrador você pode excluir qualquer lançamento (correção de erros), inclusive aprovados. Aprovações continuam sendo atribuição das chefias.";
+  if (!$("inpMes").value) $("inpMes").value = hoje().slice(0, 7);
+}
+
+function registrosFiltrados() {
+  const mes = $("inpMes").value;
+  const pessoa = $("selServidorVer").value;
+  const sit = $("selSituacao").value;
+  return dados.registros
+    .filter(r => r.data.startsWith(mes))
+    .filter(r => ehServidor() ? ehMeu(r) : true)
+    .filter(r => (!pessoa || pessoa === "*") ? true : r.servidor === pessoa)
+    .filter(r => !sit ? true : (sit === "ap") === Boolean(aprovacaoDe(r)))
+    .sort((x, y) => x.data.localeCompare(y.data) ||
+                    x.servidor.localeCompare(y.servidor) ||
+                    x.id.localeCompare(y.id));
+}
+
+function render() {
+  if (!ident || ehAdm() && $("cardPainel").hidden) return;
+  if (!ehAdm()) montarFrequentes();
+  if (ehChefia() || ehGeral() || ehAdm()) {
+    const nomes = [...new Set(dados.registros.map(r => r.servidor))].sort();
+    const sel = $("selServidorVer"); const antes = sel.value;
+    sel.innerHTML = `<option value="*">Todas as pessoas</option>` +
+      nomes.map(n => `<option value="${n}">${n}</option>`).join("");
+    if (nomes.includes(antes)) sel.value = antes;
+  }
+
+  const regs = registrosFiltrados();
+  const linhas = [];
+  let i = 0;
+  while (i < regs.length) {
+    const dia = regs[i].data;
+    let somaDia = 0;
+    while (i < regs.length && regs[i].data === dia) {
+      const r = regs[i]; somaDia += r.pontos;
+      const ap = aprovacaoDe(r);
+      const badge = `<span class="st ${ap ? "ap" : "pe"}"
+        title="${ap ? "Aprovado por " + (ap.por || "chefia") : "Aguardando aprovação"}">${ap ? "Aprovado" : "Pendente"}</span>`;
+      const situacao = podeAprovar(r)
+        ? `<label style="font-weight:400;display:flex;gap:6px;align-items:center;white-space:nowrap">
+             <input type="checkbox" data-ap="${r.id}" ${ap ? "checked" : ""}> ${badge}</label>`
+        : badge;
+      const tagPapel = papelDe(r) !== "servidor"
+        ? ` <span class="tag-papel">${papelDe(r) === "geral" ? "chefia geral" : "chefia"}</span>` : "";
+      const acao = ((ehMeu(r) && !ap) || ehAdm())
+        ? `<button class="excluir" data-del="${r.id}" aria-label="Excluir lançamento">Excluir</button>` : "";
+      linhas.push(`<tr>
+        <td>${fmtData(r.data)}</td>
+        <td class="${ehServidor() ? "esconde-m" : ""}">${r.servidor}${tagPapel}${(ehGeral() || ehAdm()) && r.unidade !== GERAL ? `<br><small style="color:var(--grafite)">${r.unidade}</small>` : ""}</td>
+        <td class="atv" title="${r.processo}">${r.atividade}${r.abono ? ' <span class="tag-abono">abono</span>' : ''}${r.obs ? `<br><small style="color:var(--grafite)">${r.obs}</small>` : ""}</td>
+        <td class="esconde-m">${ROTULO_COMPLEXIDADE[r.complexidade]}</td>
+        <td class="num">${r.pontos}</td>
+        <td>${situacao}</td>
+        <td>${acao}</td>
+      </tr>`);
+      i++;
+    }
+    linhas.push(`<tr class="subtotal"><td colspan="4">Total do dia ${fmtData(dia)}</td>
+      <td class="num">${somaDia}</td><td colspan="2"></td></tr>`);
+  }
+  $("tbody").innerHTML = linhas.join("");
+  $("vazio").style.display = regs.length ? "none" : "block";
+
+  const meus = dados.registros
+    .filter(r => ehMeu(r) && r.data.startsWith($("inpMes").value));
+  const diaSel = $("inpData").value;
+  $("totDia").textContent = meus.filter(r => r.data === diaSel)
+                                .reduce((s, r) => s + r.pontos, 0);
+  $("totMes").textContent = meus.reduce((s, r) => s + r.pontos, 0);
+
+  if (ehChefia() || ehGeral() || ehAdm()) {
+    const porSrv = {};
+    for (const r of regs) {
+      porSrv[r.servidor] ??= { pts: 0, pend: 0 };
+      porSrv[r.servidor].pts += r.pontos;
+      if (!aprovacaoDe(r)) porSrv[r.servidor].pend++;
+    }
+    $("resumo").innerHTML = Object.entries(porSrv).sort()
+      .map(([n, v]) => `<div class="srv">${n}<br><b>${v.pts}</b> pts
+        <small>· ${v.pend ? v.pend + " pendente(s)" : "tudo aprovado"}</small></div>`)
+      .join("") || "";
+    $("btnAprovarTodos").disabled =
+      !regs.some(r => podeAprovar(r) && !aprovacaoDe(r));
+  }
+
+  renderVis(regs);
+}
+
+/* ======================= VISÃO GERENCIAL (gráficos) =======================
+   Só aparece para a chefia geral e para o administrador — são os únicos
+   papéis que enxergam mais de uma unidade. Tudo é desenhado a partir de
+   registrosFiltrados(), o mesmo conjunto que alimenta a tabela: se os
+   números divergirem da tabela, é bug.
+
+   Duas leituras, uma pergunta cada:
+   - barra empilhada por pessoa: QUANTAS atividades (comprimento) e de
+     QUE complexidade (composição);
+   - mapa de calor por unidade: onde se concentra cada nível.
+
+   Nota sobre "pontos": PONTOS = {b:5, m:10, a:15} é função direta da
+   complexidade, então pontuação e complexidade são a MESMA variável.
+   Por isso pontos aparecem só como KPI, nunca como um segundo gráfico
+   ao lado (seria o mesmo dado duas vezes) e nunca num segundo eixo. */
+const COMPL = [
+  { k: "b", rotulo: "Baixa", cor: "#86b6ef" },
+  { k: "m", rotulo: "Média", cor: "#2a78d6" },
+  { k: "a", rotulo: "Alta",  cor: "#104281" }
+];
+const VIS_INK    = "#22352C";  /* --tinta   */
+const VIS_MUDO   = "#5C6660";  /* --grafite */
+const VIS_LINHA  = "#D6DBD5";  /* --linha   */
+const VIS_PAPEL  = "#FFFFFF";  /* --ficha: a superfície dos gráficos */
+let gPessoas = null, gUnidades = null;
+let visOrdem = "alfa";         /* "alfa" | "volume" — ver btnOrdem */
+
+/* Conta atividades por chave (pessoa ou unidade) e complexidade. */
+function agrupar(regs, chave) {
+  const m = new Map();
+  for (const r of regs) {
+    const k = chave(r);
+    if (!m.has(k)) m.set(k, { b: 0, m: 0, a: 0, total: 0, pontos: 0 });
+    const v = m.get(k);
+    v[r.complexidade]++; v.total++; v.pontos += r.pontos;
+  }
+  return m;
+}
+
+function renderVis(regs) {
+  const mostrar = (ehGeral() || ehAdm()) && regs.length > 0;
+  $("vis").hidden = !mostrar;
+  if (!mostrar) return;
+
+  /* ---------- KPIs ---------- */
+  const pontos = regs.reduce((s, r) => s + r.pontos, 0);
+  const aprov  = regs.filter(r => aprovacaoDe(r)).length;
+  $("kpiLanc").textContent   = regs.length;
+  $("kpiPontos").textContent = pontos;
+  $("kpiAprov").innerHTML    = Math.round(aprov / regs.length * 100) +
+                               `<span class="sufixo">%</span>`;
+  $("kpiPend").textContent   = regs.length - aprov;
+
+  /* ---------- barra empilhada: pessoa × complexidade ---------- */
+  const porPessoa = agrupar(regs, r => r.servidor);
+  let nomes = [...porPessoa.keys()];
+  /* Alfabética é o padrão de propósito: ordenar por volume transforma o
+     painel num ranking de produtividade, e o dado não sustenta essa
+     leitura (abono, férias, jornada e a complexidade fixada no catálogo
+     não estão modelados). Quem quiser o ranking pede explicitamente. */
+  nomes.sort(visOrdem === "volume"
+    ? (x, y) => porPessoa.get(y).total - porPessoa.get(x).total || x.localeCompare(y)
+    : (x, y) => x.localeCompare(y));
+  /* O eixo Y do ECharts cresce de baixo para cima: inverter deixa o
+     primeiro nome no TOPO, que é como a lista é lida. */
+  const eixo = nomes.slice().reverse();
+
+  const series = COMPL.map((c, i) => ({
+    name: c.rotulo,
+    type: "bar",
+    stack: "total",
+    barMaxWidth: 24,
+    itemStyle: {
+      color: c.cor,
+      /* O "espaçador de superfície": 1px de branco de cada lado soma os
+         2px de respiro entre segmentos encostados. Não é contorno — é
+         o fundo passando entre as marcas. */
+      borderColor: VIS_PAPEL, borderWidth: 1
+    },
+    data: eixo.map(n => {
+      const v = porPessoa.get(n);
+      /* Ponta arredondada só no último segmento com valor de cada barra. */
+      const ultimo = COMPL.map(x => x.k).reduce(
+        (acc, k, j) => v[k] > 0 ? j : acc, -1);
+      return { value: v[c.k],
+               itemStyle: i === ultimo ? { borderRadius: [0, 4, 4, 0] } : {} };
+    })
+  }));
+
+  /* Nomes completos ("João Vitor Albuquerque Mendonça") engolem a área
+     de plotagem no celular: o rótulo é limitado a um terço da largura e
+     truncado com reticências — o nome inteiro continua na dica, no
+     #resumo e na tabela. */
+  const larguraRotulo = Math.max(84,
+    Math.min(210, Math.round(($("chartPessoas").clientWidth || 640) * 0.33)));
+
+  gPessoas = desenhar("chartPessoas", gPessoas,
+    Math.max(170, eixo.length * 34 + 96), {
+    grid: { left: 8, right: 28, top: 40, bottom: 28, containLabel: true },
+    legend: { data: COMPL.map(c => c.rotulo), top: 6, left: 0, itemGap: 16,
+              itemWidth: 12, itemHeight: 12, icon: "roundRect",
+              textStyle: { color: VIS_MUDO, fontSize: 12 } },
+    tooltip: {
+      trigger: "axis", axisPointer: { type: "shadow" },
+      backgroundColor: "#fff", borderColor: VIS_LINHA, borderWidth: 1,
+      textStyle: { color: VIS_INK, fontSize: 12 },
+      formatter: (ps) => {
+        const v = porPessoa.get(ps[0].name);
+        return `<b>${ps[0].name}</b><br>` +
+          COMPL.map(c => `${c.rotulo}: ${v[c.k]}`).join("<br>") +
+          `<br><span style="color:${VIS_MUDO}">Total: ${v.total} atividade(s) · ${v.pontos} pts</span>`;
+      }
+    },
+    xAxis: { type: "value", minInterval: 1,
+             /* hideOverlap evita "0 3 6 9121518" em tela estreita. */
+             axisLabel: { color: VIS_MUDO, fontSize: 11, hideOverlap: true },
+             axisLine: { show: false }, axisTick: { show: false },
+             splitLine: { lineStyle: { color: VIS_LINHA, width: 1 } } },
+    yAxis: { type: "category", data: eixo,
+             axisLabel: { color: VIS_INK, fontSize: 12,
+                          width: larguraRotulo, overflow: "truncate", ellipsis: "…" },
+             axisLine: { lineStyle: { color: VIS_LINHA } },
+             axisTick: { show: false } },
+    series
+  });
+
+  const abonos = regs.filter(r => r.abono).length;
+  $("notaPessoas").textContent =
+    "Comprimento da barra = número de atividades; a cor divide por complexidade " +
+    "(mais escuro = mais complexo). Os mesmos números estão na tabela abaixo." +
+    (abonos ? ` Inclui ${abonos} lançamento(s) de abono, que contam como atividade.` : "");
+
+  /* ---------- mapa de calor: unidade × complexidade ---------- */
+  const porUnidade = agrupar(regs, r => r.unidade);
+  const unidades = [...porUnidade.keys()].sort();
+  /* Com uma unidade só na tela o mapa vira uma linha de três células e
+     não diz nada que a barra acima já não tenha dito. */
+  $("figUnidades").hidden = unidades.length < 2;
+  if (unidades.length < 2) { gUnidades?.dispose(); gUnidades = null; return; }
+
+  const linhas = unidades.slice().reverse();
+  const celulas = [];
+  let maxCel = 0;
+  linhas.forEach((u, y) => COMPL.forEach((c, x) => {
+    const n = porUnidade.get(u)[c.k];
+    maxCel = Math.max(maxCel, n);
+    celulas.push([x, y, n]);
+  }));
+
+  gUnidades = desenhar("chartUnidades", gUnidades,
+    Math.max(180, linhas.length * 38 + 108), {
+    grid: { left: 8, right: 16, top: 16, bottom: 62, containLabel: true },
+    tooltip: {
+      backgroundColor: "#fff", borderColor: VIS_LINHA, borderWidth: 1,
+      textStyle: { color: VIS_INK, fontSize: 12 },
+      formatter: (p) => `<b>${linhas[p.value[1]]}</b><br>` +
+        `Complexidade ${COMPL[p.value[0]].rotulo.toLowerCase()}: ` +
+        `${p.value[2]} atividade(s)`
+    },
+    xAxis: { type: "category", data: COMPL.map(c => c.rotulo), position: "top",
+             axisLabel: { color: VIS_MUDO, fontSize: 12 },
+             axisLine: { show: false }, axisTick: { show: false },
+             splitArea: { show: false } },
+    yAxis: { type: "category", data: linhas,
+             axisLabel: { color: VIS_INK, fontSize: 12 },
+             axisLine: { show: false }, axisTick: { show: false },
+             splitArea: { show: false } },
+    /* Escala sequencial contínua: um matiz só, claro → escuro. Aqui o
+       passo mais claro PODE encostar na superfície, porque significa
+       "perto de zero" — o número dentro da célula garante a leitura. */
+    visualMap: {
+      min: 0, max: Math.max(1, maxCel), calculable: false,
+      orient: "horizontal", left: "center", bottom: 4, itemWidth: 12, itemHeight: 90,
+      text: ["mais", "menos"], textStyle: { color: VIS_MUDO, fontSize: 11 },
+      inRange: { color: ["#eaf2fd", "#9ec5f4", "#3987e5", "#184f95", "#0d366b"] }
+    },
+    series: [{
+      type: "heatmap",
+      /* Texto dentro de preenchimento colorido: branco ou tinta conforme
+         a luminância da célula, para nunca perder contraste. */
+      data: celulas.map(([x, y, n]) => ({
+        value: [x, y, n],
+        label: { color: n > maxCel * 0.55 ? "#fff" : VIS_INK }
+      })),
+      itemStyle: { borderColor: VIS_PAPEL, borderWidth: 1 },
+      /* O zero é escrito. Célula clara e vazia parece dado faltando;
+         "0" diz que a unidade não registrou nada naquele nível. */
+      label: { show: true, fontSize: 12, formatter: (p) => String(p.value[2]) },
+      emphasis: { itemStyle: { borderColor: VIS_INK, borderWidth: 2 } }
+    }]
+  });
+}
+
+/* Cria ou reaproveita a instância do ECharts de um contêiner. */
+function desenhar(id, instancia, altura, opcao) {
+  const el = $(id);
+  el.style.height = altura + "px";
+  if (!instancia || instancia.isDisposed()) instancia = echarts.init(el, null, { renderer: "canvas" });
+  else instancia.resize();
+  instancia.setOption(opcao, true);
+  return instancia;
+}
+
+$("btnOrdem").addEventListener("click", () => {
+  visOrdem = visOrdem === "alfa" ? "volume" : "alfa";
+  $("btnOrdem").textContent =
+    visOrdem === "alfa" ? "ordenar por volume" : "ordem alfabética";
+  render();
+});
+
+let visTimerResize;
+window.addEventListener("resize", () => {
+  clearTimeout(visTimerResize);
+  visTimerResize = setTimeout(() => {
+    if ($("vis").hidden) return;
+    gPessoas?.resize(); gUnidades?.resize();
+  }, 150);
+});
+
+["inpMes", "selServidorVer", "selSituacao"].forEach(id =>
+  $(id).addEventListener("change", render));
+$("selUnidadeVer").addEventListener("change", recarregar);
+$("inpData").addEventListener("change", render);
+
+/* -------- ações na tabela: excluir e aprovar -------- */
+$("tbody").addEventListener("click", async (e) => {
+  const del = e.target.dataset.del;
+  if (!del) return;
+  const r = dados.registros.find(x => x.id === del);
+  if (!r) return;
+  if (!(ehMeu(r) && !aprovacaoDe(r)) && !ehAdm()) return;
+  const msg = ehAdm()
+    ? `Excluir o lançamento de ${r.servidor} em ${fmtData(r.data)} (${r.pontos} pts)${aprovacaoDe(r) ? ", JÁ APROVADO," : ""} de forma definitiva?`
+    : "Excluir este lançamento?";
+  if (!confirm(msg)) return;
+  try {
+    const atual = await lerMeuArquivo(dirRaiz, r.unidade, r.servidor);
+    const regs = ((atual && atual.registros) || []).filter(x => x.id !== del);
+    await gravarMeuArquivo(dirRaiz, r.unidade, r.servidor, regs);
+    // administrador: remove também a aprovação órfã, se houver
+    if (ehAdm() && aprovacaoDe(r)) {
+      const unidadeArq = papelDe(r) === "servidor" ? r.unidade : GERAL;
+      try {
+        const mapa = await lerAprovacoes(dirRaiz, unidadeArq);
+        if (mapa[del]) { delete mapa[del]; await gravarAprovacoes(dirRaiz, unidadeArq, mapa, ident.nome); }
+      } catch { /* sem permissão de escrita no arquivo de aprovações: segue */ }
+    }
+    await recarregar();
+  } catch (er) {
+    avisar($("avisoPainel"), "Não foi possível gravar na rede: " + er.message, true);
+  }
+});
+$("tbody").addEventListener("change", (e) => {
+  const id = e.target.dataset.ap;
+  if (!id) return;
+  const r = dados.registros.find(x => x.id === id);
+  if (r && podeAprovar(r)) aplicarAprovacao([r], e.target.checked);
+});
+$("btnAprovarTodos").addEventListener("click", () => {
+  const alvo = registrosFiltrados().filter(r => podeAprovar(r) && !aprovacaoDe(r));
+  if (alvo.length && confirm(`Aprovar ${alvo.length} lançamento(s) pendente(s)?`))
+    aplicarAprovacao(alvo, true);
+});
+async function aplicarAprovacao(registros, aprovar) {
+  const unidadeArq = ehGeral() ? GERAL : ident.unidade;
+  try {
+    const mapa = await lerAprovacoes(dirRaiz, unidadeArq);
+    for (const r of registros) {
+      if (aprovar) mapa[r.id] = { por: ident.nome, em: new Date().toISOString() };
+      else delete mapa[r.id];
+    }
+    await gravarAprovacoes(dirRaiz, unidadeArq, mapa, ident.nome);
+    if (ehGeral()) dados.aprovG = mapa; else dados.aprovU = mapa;
+    avisar($("avisoPainel"),
+      `${registros.length} lançamento(s) ${aprovar ? "aprovado(s)" : "marcado(s) como pendente(s)"}.`);
+    render();
+  } catch (e) {
+    avisar($("avisoPainel"), "Não foi possível gravar as aprovações: " + e.message, true);
+  }
+}
+
+/* ============================ ADMINISTRAÇÃO ============================ */
+function pessoasAdministraveis() {
+  const lista = [{ nome: ADM_NOME, desc: "Administrador" }];
+  if (CFG.chefiaGeral) lista.push({ nome: CFG.chefiaGeral, desc: "Chefia geral" });
+  for (const u of Object.keys(CFG.unidades)) {
+    if (CFG.unidades[u].chefia) lista.push({ nome: CFG.unidades[u].chefia, desc: `Chefia · ${u}` });
+    for (const s of servidoresDe(u)) lista.push({ nome: s, desc: `Servidor · ${u}` });
+  }
+  return lista;
+}
+function renderAdm() {
+  $("infoInstalacao").textContent = CFG.instalacao
+    ? `Oficializada por ${CFG.instalacao.por} em ${fmtData(CFG.instalacao.em.slice(0, 10))} · identificador ${CFG.instalacao.id.slice(0, 8)}…  As pessoas só conseguem entrar em pastas com este selo.`
+    : "Pasta ainda não oficializada — confirme sua identidade nesta pasta para oficializá-la.";
+  $("chkExigirSenha").checked = CFG.exigirSenha;
+  $("tbodySenhas").innerHTML = pessoasAdministraveis().map(p => {
+    const tem = Boolean(CFG.senhas[p.nome]);
+    const st = (p.nome === ADM_NOME && !tem)
+      ? `<span class="st pe">inicial ("${ADM_SENHA_INICIAL}")</span>`
+      : `<span class="st ${tem ? "ap" : "pe"}">${tem ? "definida" : "sem senha"}</span>`;
+    return `<tr>
+      <td>${p.nome}</td>
+      <td>${p.desc}</td>
+      <td>${st}</td>
+      <td style="white-space:nowrap">
+        <button class="acao sec mini" data-senha="${p.nome}">${tem ? "Alterar" : "Definir"} senha</button>
+        ${tem && p.nome !== ADM_NOME ? `<button class="excluir" data-rmsenha="${p.nome}">Remover</button>` : ""}
+      </td></tr>`;
+  }).join("");
+  $("txtCatalogo").value = JSON.stringify(
+    { unidades: CFG.unidades, chefiaGeral: CFG.chefiaGeral }, null, 2);
+}
+async function salvarCFG(msgOk) {
+  if (!dirRaiz) return avisar($("avisoAdm"), "Conecte a pasta da rede primeiro.", true);
+  try {
+    await gravarConfig(dirRaiz, CFG);
+    avisar($("avisoAdm"), msgOk);
+    montarPessoas();
+    renderAdm();
+  } catch (e) {
+    avisar($("avisoAdm"), "Não foi possível gravar o config.json: " + e.message, true);
+  }
+}
+$("cardAdm").addEventListener("click", async (e) => {
+  const nomeSenha = e.target.dataset.senha;
+  const nomeRm = e.target.dataset.rmsenha;
+  if (nomeSenha) {
+    const s1 = prompt(`Nova senha para ${nomeSenha}:`);
+    if (s1 === null) return;
+    if (s1.length < 4) return avisar($("avisoAdm"), "Use uma senha com pelo menos 4 caracteres.", true);
+    const s2 = prompt("Repita a nova senha:");
+    if (s2 === null) return;
+    if (s1 !== s2) return avisar($("avisoAdm"), "As senhas não conferem.", true);
+    CFG.senhas[nomeSenha] = await sha256hex(nomeSenha + "|" + s1);
+    await salvarCFG(`Senha de ${nomeSenha} atualizada.`);
+  }
+  if (nomeRm && confirm(`Remover a senha de ${nomeRm}?`)) {
+    delete CFG.senhas[nomeRm];
+    await salvarCFG(`Senha de ${nomeRm} removida.`);
+  }
+});
+$("chkExigirSenha").addEventListener("change", async (e) => {
+  CFG.exigirSenha = e.target.checked;
+  await salvarCFG(`Exigência de senha ${CFG.exigirSenha ? "ativada" : "desativada"}.`);
+});
+$("btnSalvarCatalogo").addEventListener("click", async () => {
+  let novo;
+  try { novo = JSON.parse($("txtCatalogo").value); }
+  catch (e) { return avisar($("avisoAdm"), "JSON inválido: " + e.message, true); }
+  if (!novo || typeof novo.unidades !== "object" || Array.isArray(novo.unidades))
+    return avisar($("avisoAdm"), 'Estrutura esperada: { "unidades": { ... }, "chefiaGeral": "nome" | null }', true);
+  for (const [u, v] of Object.entries(novo.unidades)) {
+    if (!v || typeof v !== "object" || !Array.isArray(v.servidores) ||
+        !("chefia" in v) || (v.chefia !== null && typeof v.chefia !== "string"))
+      return avisar($("avisoAdm"),
+        `Unidade "${u}" inválida: use { "chefia": "nome" | null, "servidores": ["..."] }`, true);
+  }
+  CFG.unidades = novo.unidades;
+  CFG.chefiaGeral = (typeof novo.chefiaGeral === "string" && novo.chefiaGeral.trim()) || null;
+  await salvarCFG("Catálogo salvo — vale para todos ao recarregarem os dados.");
+});
+
+/* ------------------------------- CSV ------------------------------- */
+$("btnCSV").addEventListener("click", () => {
+  const regs = registrosFiltrados();
+  const esc = (v) => `"${String(v ?? "").replaceAll('"', '""')}"`;
+  const cab = ["Data", "Unidade", "Pessoa", "Papel", "Processo", "Atividade",
+               "Complexidade", "Pontuação", "Observações", "Abono",
+               "Situação", "Aprovado por", "Aprovado em"];
+  const linhas = regs.map(r => {
+    const ap = aprovacaoDe(r);
+    return [fmtData(r.data), r.unidade, r.servidor,
+      papelDe(r) === "servidor" ? "Servidor" : papelDe(r) === "chefia" ? "Chefia" : "Chefia geral",
+      r.processo, r.atividade, ROTULO_COMPLEXIDADE[r.complexidade], r.pontos, r.obs,
+      r.abono ? "Sim" : "Não", ap ? "Aprovado" : "Pendente",
+      ap?.por || "", ap ? fmtData(ap.em.slice(0, 10)) : ""].map(esc).join(";");
+  });
+  const escopo = (ehGeral() || ehAdm())
+    ? ($("selUnidadeVer").value === "*" ? "todas" : $("selUnidadeVer").value)
+    : ident.unidade;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob(
+    ["﻿" + cab.map(esc).join(";") + "\r\n" + linhas.join("\r\n")],
+    { type: "text/csv;charset=utf-8" }));
+  a.download = `registro-${escopo}-${$("inpMes").value}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+/* --------------------------- INICIALIZAÇÃO --------------------------- */
+montarPessoas();
+montarProcessos();
+$("inpSenha").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") $("btnIniciar").click();
+});
+$("inpData").value = hoje();
+$("txtCaminho").textContent =
+  (typeof PASTA_REDE !== "undefined" && PASTA_REDE) || "definida pelo administrador";
+conectarSilencioso();
+
+if ("serviceWorker" in navigator && location.protocol.startsWith("http"))
+  navigator.serviceWorker.register("sw.js");
+</script>
+
+</body>
+</html>
