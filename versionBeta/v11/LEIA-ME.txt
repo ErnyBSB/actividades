@@ -174,6 +174,24 @@ toda escrita passa por atualizarArquivoPessoa(), que lê o estado atual,
 aplica a mudança e regrava o conjunto. Não chame gravarMeuArquivo()
 direto ao acrescentar uma quarta coisa no futuro.
 
+Recusa de gravar por cima de arquivo ilegível
+---------------------------------------------
+Antes de gravar, atualizarArquivoPessoa() lê com lerArquivoParaGravar(),
+que separa dois casos que lerMeuArquivo() confunde num null só:
+
+  arquivo não existe, ou está vazio -> pode criar
+  existe mas não decifra            -> RECUSA, nada é gravado
+
+Sem essa separação, um arquivo corrompido (uma gravação interrompida,
+por exemplo) seria tratado como "pessoa nova" e sobrescrito com uma
+lista de lançamentos VAZIA — o histórico inteiro dela perdido, e no
+primeiro acesso, porque a gravação da carga horária acontece já na
+identificação. A tela mostra o nome do arquivo e manda procurar o
+administrador; a identidade não é travada.
+
+Arquivo com JSON válido mas sem a lista "registros" também é recusado:
+estrutura inesperada é motivo para parar, não para presumir vazio.
+
 A escolha do lugar não é arbitrária. A carga NÃO foi para o config.json
 porque aquele arquivo é gravado somente pelo administrador: se cada
 servidor precisasse escrever nele para marcar a própria jornada, duas

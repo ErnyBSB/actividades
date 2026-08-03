@@ -765,7 +765,10 @@ $("selPessoa").addEventListener("change", aoTrocarPessoa);
    por aqui: lê o estado atual, aplica a mudança e regrava o conjunto.
    Ponto único de escrita — não chame gravarMeuArquivo direto. */
 async function atualizarArquivoPessoa(unidade, nome, mudar) {
-  const atual = await lerMeuArquivo(dirRaiz, unidade, nome);
+  /* Leitura estrita: se o arquivo existir e não for decifrável, isto
+     lança em vez de devolver null — sem isso, gravaríamos um arquivo
+     novo e vazio por cima do histórico da pessoa. */
+  const atual = await lerArquivoParaGravar(dirRaiz, unidade, nome);
   const estado = {
     registros: (atual && atual.registros) || [],
     ausencias: (atual && atual.ausencias) || [],
@@ -776,6 +779,11 @@ async function atualizarArquivoPessoa(unidade, nome, mudar) {
     estado.registros, estado.carga, estado.ausencias);
   return estado;
 }
+/* A recusa por arquivo ilegível já explica tudo e não é falha de
+   gravação — mostrar "não foi possível gravar" na frente dela mentiria
+   sobre o que aconteceu. */
+const msgErro = (e, prefixo) => e.arquivoIlegivel ? e.message : prefixo + e.message;
+
 /* Grava a carga preservando lançamentos e ausências já existentes. */
 async function salvarCarga(pessoa, carga) {
   await atualizarArquivoPessoa(pessoa.unidade, pessoa.nome, (e) => { e.carga = carga; });
@@ -833,7 +841,7 @@ $("btnIniciar").addEventListener("click", async () => {
     try { await salvarCarga(p, cargaSel); }
     catch (e) {
       return avisar($("avisoIdent"),
-        "Não foi possível gravar a carga horária na rede: " + e.message, true);
+        msgErro(e, "Não foi possível gravar a carga horária na rede: "), true);
     }
   }
   identificar(p, cargaSel);
@@ -1251,7 +1259,7 @@ $("btnRegistrarAus").addEventListener("click", async () => {
     await recarregar();
     gravou = true;
   } catch (e) {
-    avisar($("avisoAus"), "Não foi possível gravar na rede: " + e.message, true);
+    avisar($("avisoAus"), msgErro(e, "Não foi possível gravar na rede: "), true);
   }
   if (gravou) mostrarReciboAus(nova);
 });
@@ -1273,7 +1281,7 @@ async function excluirAusencia(id) {
     await recarregar();
   } catch (e) {
     avisar($(minha ? "avisoAus" : "avisoPainel"),
-      "Não foi possível excluir na rede: " + e.message, true);
+      msgErro(e, "Não foi possível excluir na rede: "), true);
   }
 }
 $("cardAusencias").addEventListener("click", (e) => {
@@ -1461,7 +1469,7 @@ $("btnRegistrar").addEventListener("click", async () => {
     await recarregar();
     gravou = true;
   } catch (e) {
-    avisar($("aviso"), "Não foi possível gravar na rede: " + e.message, true);
+    avisar($("aviso"), msgErro(e, "Não foi possível gravar na rede: "), true);
   }
   /* Fora do try de propósito: o lançamento JÁ está na rede. Um defeito ao
      montar o recibo não pode virar "não foi possível gravar", que mandaria
@@ -1885,7 +1893,7 @@ $("tbody").addEventListener("click", async (e) => {
     }
     await recarregar();
   } catch (er) {
-    avisar($("avisoPainel"), "Não foi possível gravar na rede: " + er.message, true);
+    avisar($("avisoPainel"), msgErro(er, "Não foi possível gravar na rede: "), true);
   }
 });
 $("tbody").addEventListener("change", (e) => {

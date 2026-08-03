@@ -95,6 +95,50 @@ async function gravarMeuArquivo(raiz, unidade, servidor, registros, cargaHoraria
     ausencias: ausencias || []
   });
 }
+/* Leitura ESTRITA, obrigatória antes de qualquer gravação.
+
+   lerMeuArquivo() devolve null tanto para "o arquivo não existe" quanto
+   para "o arquivo existe mas está ilegível" — e regravar em cima do
+   segundo caso apaga o histórico inteiro da pessoa. Aqui os dois casos
+   são separados:
+
+     não existe (ou está vazio)  -> null, pode criar à vontade
+     existe e não decifra        -> lança erro, NÃO grave por cima
+
+   O erro leva a marca .arquivoIlegivel para que a tela mostre o texto
+   como está, sem prefixo de "falha ao gravar": não houve falha de
+   gravação, houve recusa deliberada de gravar. */
+async function lerArquivoParaGravar(raiz, unidade, servidor) {
+  const arquivo = slug(servidor) + ".json";
+  let fh;
+  try {
+    const dir = await pastaLancamentos(raiz, unidade);
+    fh = await dir.getFileHandle(arquivo);
+  } catch (e) {
+    // só "não encontrado" é seguro tratar como pasta/arquivo novo;
+    // falta de permissão e afins têm de subir
+    if (e && e.name === "NotFoundError") return null;
+    throw e;
+  }
+  const texto = await (await fh.getFile()).text();
+  if (!texto.trim()) return null;   // vazio: não há histórico a perder
+
+  const recusa = (motivo) => {
+    const e = new Error(
+      `O arquivo ${arquivo} ${motivo}. Gravar por cima apagaria os ` +
+      `lançamentos já registrados, então nada foi gravado. Peça ao ` +
+      `administrador para conferir esse arquivo na pasta da rede.`);
+    e.arquivoIlegivel = true;
+    return e;
+  };
+  let dado;
+  try { dado = JSON.parse(texto); }
+  catch { throw recusa("existe mas está ilegível (JSON inválido)"); }
+  if (!dado || !Array.isArray(dado.registros))
+    throw recusa("não tem a lista de lançamentos no formato esperado");
+  return dado;
+}
+
 /* Carga horária já gravada por esta pessoa, ou null se ainda não marcou
    (arquivo inexistente ou gravado por uma versão anterior à v11). */
 async function lerCargaHoraria(raiz, unidade, servidor) {
