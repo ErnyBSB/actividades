@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programa de Resultados — proposta de redesenho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700&family=Instrument+Serif:ital@0,1&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:oklch(0.96 0.004 140);color:oklch(0.24 0.012 155);
+    font-family:"Instrument Sans",system-ui,sans-serif;font-size:14px;line-height:1.5;
+    -webkit-font-smoothing:antialiased}
+  a{color:oklch(0.43 0.05 148);text-decoration:none}
+  a:hover{color:oklch(0.34 0.05 148);text-decoration:underline}
+  *{box-sizing:border-box}
+  button{font-family:inherit}
+  ::selection{background:oklch(0.93 0.03 148)}
+</style>
+</helmet>
+
+<div style="display:flex;min-height:100vh;align-items:stretch">
+
+  <!-- ==================== RAIL DE NAVEGAÇÃO ==================== -->
+  <nav style="flex:0 0 244px;background:oklch(0.26 0.018 155);color:oklch(0.93 0.006 140);display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
+    <div style="padding:22px 20px 18px;border-bottom:1px solid oklch(0.33 0.018 155)">
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1;color:oklch(0.98 0.01 140)">Resultados</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <span style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.72 0.02 148)">COBIB</span>
+        <span style="font-size:10.5px;letter-spacing:.04em;color:oklch(0.70 0.015 148);border:1px solid oklch(0.38 0.02 155);border-radius:999px;padding:1px 7px">{{ versao }}</span>
+      </div>
+    </div>
+
+    <div style="padding:14px 10px;display:flex;flex-direction:column;gap:2px">
+      <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.62 0.015 148);padding:6px 10px 8px">Meu trabalho</div>
+
+      <button onClick="{{ irLancar }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:{{ bgLancar }};color:{{ fgLancar }}" style-hover="background:oklch(0.32 0.02 155)">
+        <span style="width:6px;height:6px;border-radius:50%;background:{{ dotLancar }};flex:none"></span>
+        Lançar atividade
+      </button>
+      <button onClick="{{ irMes }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:{{ bgMes }};color:{{ fgMes }}" style-hover="background:oklch(0.32 0.02 155)">
+        <span style="width:6px;height:6px;border-radius:50%;background:{{ dotMes }};flex:none"></span>
+        Meu mês
+        <span style="margin-left:auto;font-size:11px;color:oklch(0.72 0.02 148);font-variant-numeric:tabular-nums">86%</span>
+      </button>
+      <button onClick="{{ irAus }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:{{ bgAus }};color:{{ fgAus }}" style-hover="background:oklch(0.32 0.02 155)">
+        <span style="width:6px;height:6px;border-radius:50%;background:{{ dotAus }};flex:none"></span>
+        Ausências
+      </button>
+
+      <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.62 0.015 148);padding:18px 10px 8px">Gestão</div>
+
+      <button onClick="{{ irPainel }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:{{ bgPainel }};color:{{ fgPainel }}" style-hover="background:oklch(0.32 0.02 155)">
+        <span style="width:6px;height:6px;border-radius:50%;background:{{ dotPainel }};flex:none"></span>
+        Painel da unidade
+        <span style="margin-left:auto;font-size:11px;font-weight:600;background:oklch(0.62 0.11 82);color:oklch(0.22 0.03 82);border-radius:999px;padding:0 7px">7</span>
+      </button>
+      <button onClick="{{ irAdm }}" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:7px;font-size:13.5px;font-weight:500;background:{{ bgAdm }};color:{{ fgAdm }}" style-hover="background:oklch(0.32 0.02 155)">
+        <span style="width:6px;height:6px;border-radius:50%;background:{{ dotAdm }};flex:none"></span>
+        Administração
+      </button>
+    </div>
+
+    <div style="margin-top:auto;padding:16px 16px 18px;border-top:1px solid oklch(0.33 0.018 155);display:flex;flex-direction:column;gap:10px">
+      <button onClick="{{ irEntrada }}" style="all:unset;cursor:pointer;display:flex;gap:10px;align-items:flex-start;border-radius:8px;padding:8px 9px" style-hover="background:oklch(0.31 0.02 155)">
+        <span style="width:30px;height:30px;flex:none;border-radius:50%;background:oklch(0.43 0.05 148);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">CR</span>
+        <span style="display:block;min-width:0">
+          <span style="display:block;font-size:13px;font-weight:600;color:oklch(0.97 0.006 140);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Christiane Rocha</span>
+          <span style="display:block;font-size:11.5px;color:oklch(0.72 0.02 148)">SEORE · servidora · 6h/dia</span>
+        </span>
+      </button>
+      <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;color:oklch(0.74 0.02 148);padding:0 9px">
+        <span style="width:7px;height:7px;border-radius:50%;background:oklch(0.72 0.16 148);flex:none;box-shadow:0 0 0 3px oklch(0.72 0.16 148 / .18)"></span>
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">unidadeCentral · há 4 min</span>
+      </div>
+      <button style="all:unset;cursor:pointer;text-align:center;font-size:12px;font-weight:600;padding:8px;border-radius:7px;border:1px solid oklch(0.40 0.025 155);color:oklch(0.88 0.01 140)" style-hover="background:oklch(0.32 0.02 155);border-color:oklch(0.55 0.05 148)">Atualizar dados da rede</button>
+    </div>
+  </nav>
+
+  <!-- ==================== ÁREA PRINCIPAL ==================== -->
+  <main style="flex:1 1 auto;min-width:0;display:flex;flex-direction:column">
+
+    <!-- ---------- LANÇAR ---------- -->
+    <sc-if value="{{ vLancar }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <header style="padding:26px 34px 20px;border-bottom:1px solid oklch(0.90 0.006 150);background:oklch(0.985 0.003 140);display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap">
+        <div style="flex:1 1 auto;min-width:0">
+          <h1 style="font-family:'Instrument Serif',Georgia,serif;font-size:29px;font-weight:400;margin:0;line-height:1.1">Lançar atividade</h1>
+          <p style="margin:6px 0 0;color:oklch(0.52 0.012 150);font-size:13px;max-width:56ch">Registre uma atividade por vez. O que você lança hoje aparece à direita; o histórico do mês fica em <b style="font-weight:600">Meu mês</b>.</p>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Data do lançamento</span>
+          <input type="date" value="2026-08-05" style="font:inherit;font-size:14px;padding:9px 11px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit;min-width:180px">
+        </label>
+      </header>
+
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 316px;gap:28px;padding:28px 34px 60px;align-items:start">
+
+        <!-- coluna do formulário -->
+        <div style="display:flex;flex-direction:column;gap:22px;min-width:0">
+
+          <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:22px 22px 24px">
+            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:14px;width:22px;height:22px;border-radius:50%;background:oklch(0.95 0.02 148);color:oklch(0.40 0.05 148);display:flex;align-items:center;justify-content:center;flex:none">1</span>
+              <h2 style="font-size:15px;font-weight:600;margin:0">Qual atividade?</h2>
+            </div>
+            <p style="margin:0 0 16px 32px;color:oklch(0.52 0.012 150);font-size:12.5px">Busque por qualquer parte do texto — acentos e flexões são ignorados.</p>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+              <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;width:100%">Suas mais registradas</span>
+              <button onClick="{{ escolher1 }}" style="all:unset;cursor:pointer;font-size:12.5px;line-height:1.35;max-width:48%;border:1px solid oklch(0.89 0.008 150);border-radius:8px;padding:8px 11px;background:#fff" style-hover="border-color:oklch(0.43 0.05 148);background:oklch(0.975 0.012 148)">Organizar, controlar e preservar o acervo bibliográfico físico e digital.<span style="display:block;color:oklch(0.55 0.012 150);font-size:11px;margin-top:3px">Gerir acervo · 14 vezes</span></button>
+              <button onClick="{{ escolher2 }}" style="all:unset;cursor:pointer;font-size:12.5px;line-height:1.35;max-width:48%;border:1px solid oklch(0.89 0.008 150);border-radius:8px;padding:8px 11px;background:#fff" style-hover="border-color:oklch(0.43 0.05 148);background:oklch(0.975 0.012 148)">Receber, conferir, registrar e disponibilizar fascículos de jornais e periódicos.<span style="display:block;color:oklch(0.55 0.012 150);font-size:11px;margin-top:3px">Gerir acervo · 9 vezes</span></button>
+            </div>
+
+            <div style="position:relative">
+              <input onFocus="{{ abrirBusca }}" placeholder="Digite parte da atividade — ex.: higienizar, acervo raro, evento" style="width:100%;font:inherit;font-size:14px;padding:11px 13px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit" style-focus="border-color:oklch(0.43 0.05 148);outline:3px solid oklch(0.93 0.03 148)">
+              <sc-if value="{{ buscaAberta }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;z-index:30;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid oklch(0.88 0.008 150);border-radius:10px;box-shadow:0 14px 34px oklch(0.24 0.02 155 / .16);overflow:hidden">
+                <button onClick="{{ escolher3 }}" style="all:unset;cursor:pointer;display:block;padding:11px 13px;border-bottom:1px solid oklch(0.93 0.006 150)" style-hover="background:oklch(0.975 0.012 148)"><span style="display:block;font-size:13px;line-height:1.4">Identificar, selecionar e encaminhar materiais informacionais para <mark style="background:oklch(0.94 0.05 85);color:inherit;font-weight:600">higieniza</mark>ção, encadernação, restauração e demais ações de preservação.</span><span style="display:block;font-size:11px;color:oklch(0.55 0.012 150);margin-top:3px">Gerir acervo bibliográfico impresso e digital · baixa</span></button>
+                <button onClick="{{ escolher4 }}" style="all:unset;cursor:pointer;display:block;padding:11px 13px;border-bottom:1px solid oklch(0.93 0.006 150)" style-hover="background:oklch(0.975 0.012 148)"><span style="display:block;font-size:13px;line-height:1.4">Revisar, remanejar, ordenar e sinalizar materiais e coleções do acervo físico da Biblioteca.</span><span style="display:block;font-size:11px;color:oklch(0.55 0.012 150);margin-top:3px">Gerir acervo bibliográfico impresso e digital · média</span></button>
+                <button onClick="{{ escolher5 }}" style="all:unset;cursor:pointer;display:block;padding:11px 13px" style-hover="background:oklch(0.975 0.012 148)"><span style="display:block;font-size:13px;line-height:1.4">Supervisionar e manter a organização, conservação e integridade do acervo bibliográfico da COBIB.</span><span style="display:block;font-size:11px;color:oklch(0.55 0.012 150);margin-top:3px">Gerir acervo bibliográfico impresso e digital · média, alta</span></button>
+                <div style="padding:9px 13px;background:oklch(0.975 0.004 140);border-top:1px solid oklch(0.93 0.006 150);font-size:11.5px;color:oklch(0.55 0.012 150);display:flex;justify-content:space-between;gap:12px"><span>3 de 118 atividades</span><span>↑↓ percorrer · Enter escolher · Esc fechar</span></div>
+              </div>
+              </sc-if>
+            </div>
+
+            <div style="margin-top:12px;background:oklch(0.965 0.014 148);border:1px solid oklch(0.90 0.02 148);border-radius:9px;padding:12px 14px">
+              <span style="display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.42 0.05 148);font-weight:600;margin-bottom:4px">Atividade escolhida</span>
+              <span style="display:block;font-size:13.5px;line-height:1.45;color:oklch(0.30 0.03 150)">{{ atividade }}</span>
+              <span style="display:block;font-size:11.5px;color:oklch(0.50 0.02 150);margin-top:5px">{{ processo }}</span>
+            </div>
+            <p style="margin:10px 0 0;font-size:12px;color:oklch(0.55 0.012 150)">Prefere navegar? <a href="#">filtrar por processo de trabalho</a></p>
+          </section>
+
+          <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:22px">
+            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:14px;width:22px;height:22px;border-radius:50%;background:oklch(0.95 0.02 148);color:oklch(0.40 0.05 148);display:flex;align-items:center;justify-content:center;flex:none">2</span>
+              <h2 style="font-size:15px;font-weight:600;margin:0">Complexidade</h2>
+            </div>
+            <p style="margin:0 0 16px 32px;color:oklch(0.52 0.012 150);font-size:12.5px">A pontuação é consequência da complexidade, não uma escolha separada.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button onClick="{{ selBaixa }}" style="all:unset;cursor:pointer;flex:1 1 120px;border:1.5px solid {{ bdBaixa }};background:{{ bgBaixa }};border-radius:9px;padding:13px 14px;display:flex;align-items:baseline;gap:9px">
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1;color:{{ fgBaixa }}">5</span>
+                <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:{{ fgBaixa }}">Baixa</span>
+              </button>
+              <button onClick="{{ selMedia }}" style="all:unset;cursor:pointer;flex:1 1 120px;border:1.5px solid {{ bdMedia }};background:{{ bgMedia }};border-radius:9px;padding:13px 14px;display:flex;align-items:baseline;gap:9px">
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1;color:{{ fgMedia }}">10</span>
+                <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:{{ fgMedia }}">Média</span>
+              </button>
+              <button onClick="{{ selAlta }}" style="all:unset;cursor:pointer;flex:1 1 120px;border:1.5px solid {{ bdAlta }};background:{{ bgAlta }};border-radius:9px;padding:13px 14px;display:flex;align-items:baseline;gap:9px">
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:26px;line-height:1;color:{{ fgAlta }}">15</span>
+                <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:{{ fgAlta }}">Alta</span>
+              </button>
+            </div>
+          </section>
+
+          <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:22px">
+            <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:14px">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:14px;width:22px;height:22px;border-radius:50%;background:oklch(0.95 0.02 148);color:oklch(0.40 0.05 148);display:flex;align-items:center;justify-content:center;flex:none">3</span>
+              <h2 style="font-size:15px;font-weight:600;margin:0">Observações <span style="font-weight:400;color:oklch(0.55 0.012 150)">(opcional)</span></h2>
+            </div>
+            <textarea placeholder="Detalhes do trabalho realizado" style="width:100%;min-height:72px;resize:vertical;font:inherit;font-size:14px;padding:11px 13px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit" style-focus="border-color:oklch(0.43 0.05 148);outline:3px solid oklch(0.93 0.03 148)"></textarea>
+          </section>
+
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;bottom:0;background:linear-gradient(oklch(0.96 0.004 140 / 0), oklch(0.96 0.004 140) 40%);padding:14px 0 4px">
+            <button onClick="{{ abrirRecibo }}" style="all:unset;cursor:pointer;background:oklch(0.43 0.05 148);color:#fff;font-size:14px;font-weight:600;padding:13px 26px;border-radius:9px" style-hover="background:oklch(0.36 0.05 148)">Registrar atividade</button>
+            <span style="font-size:12.5px;color:oklch(0.52 0.012 150)">Grava em <code style="font-family:ui-monospace,Consolas,monospace;font-size:12px">SEORE/lancamentos/christiane-rocha.json</code></span>
+          </div>
+        </div>
+
+        <!-- coluna do dia -->
+        <aside style="display:flex;flex-direction:column;gap:14px;position:sticky;top:24px">
+          <div style="background:oklch(0.26 0.018 155);color:oklch(0.94 0.006 140);border-radius:12px;padding:18px 20px">
+            <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.76 0.02 148)">Hoje · 05/08/2026</span>
+            <div style="display:flex;align-items:baseline;gap:8px;margin-top:6px">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:44px;line-height:1">25</span>
+              <span style="font-size:12.5px;color:oklch(0.80 0.02 148)">de 11 pontos previstos</span>
+            </div>
+            <div style="height:5px;border-radius:999px;background:oklch(0.36 0.02 155);margin-top:14px;overflow:hidden">
+              <div style="width:100%;height:100%;background:oklch(0.72 0.16 148)"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;color:oklch(0.78 0.02 148);margin-top:7px">
+              <span>3 lançamentos</span><span>meta do dia cumprida</span>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;overflow:hidden">
+            <div style="padding:13px 16px;border-bottom:1px solid oklch(0.93 0.006 150);display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:12.5px;font-weight:600">Lançado hoje</span>
+              <span style="font-size:11.5px;color:oklch(0.55 0.012 150)">3</span>
+            </div>
+            <div style="padding:12px 16px;border-bottom:1px solid oklch(0.95 0.004 150);display:flex;gap:10px;align-items:flex-start">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:17px;line-height:1.1;color:oklch(0.43 0.05 148);min-width:22px;text-align:right">10</span>
+              <span style="font-size:12.5px;line-height:1.4;min-width:0">Organizar, controlar e preservar o acervo bibliográfico físico e digital.<span style="display:block;margin-top:4px"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:1px 8px;background:oklch(0.95 0.03 85);color:oklch(0.48 0.09 82)">pendente</span></span></span>
+            </div>
+            <div style="padding:12px 16px;border-bottom:1px solid oklch(0.95 0.004 150);display:flex;gap:10px;align-items:flex-start">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:17px;line-height:1.1;color:oklch(0.43 0.05 148);min-width:22px;text-align:right">10</span>
+              <span style="font-size:12.5px;line-height:1.4;min-width:0">Realizar atendimento presencial e remoto aos usuários.<span style="display:block;margin-top:4px"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:1px 8px;background:oklch(0.94 0.03 148);color:oklch(0.42 0.05 148)">aprovado</span></span></span>
+            </div>
+            <div style="padding:12px 16px;display:flex;gap:10px;align-items:flex-start">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:17px;line-height:1.1;color:oklch(0.43 0.05 148);min-width:22px;text-align:right">5</span>
+              <span style="font-size:12.5px;line-height:1.4;min-width:0">Receber, conferir e registrar materiais adquiridos ou recebidos em doação.<span style="display:block;margin-top:4px"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:1px 8px;background:oklch(0.95 0.03 85);color:oklch(0.48 0.09 82)">pendente</span></span></span>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:15px 16px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-size:12.5px;color:oklch(0.45 0.012 150)">Total do mês</span>
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:22px">218</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;padding-top:10px;border-top:1px solid oklch(0.95 0.004 150)">
+              <span style="font-size:12.5px;color:oklch(0.45 0.012 150)">Meta alcançada</span>
+              <span style="font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.95 0.03 85);color:oklch(0.48 0.09 82)">86% <span style="font-weight:400">em 19 dias</span></span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ---------- MEU MÊS ---------- -->
+    <sc-if value="{{ vMes }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <header style="padding:26px 34px 20px;border-bottom:1px solid oklch(0.90 0.006 150);background:oklch(0.985 0.003 140);display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap">
+        <div style="flex:1 1 auto;min-width:0">
+          <h1 style="font-family:'Instrument Serif',Georgia,serif;font-size:29px;font-weight:400;margin:0;line-height:1.1">Meu mês</h1>
+          <p style="margin:6px 0 0;color:oklch(0.52 0.012 150);font-size:13px">Christiane Rocha · SEORE · 6 h/dia · meta de 11 pontos por dia trabalhado</p>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Mês de referência</span>
+          <input type="month" value="2026-08" style="font:inherit;font-size:14px;padding:9px 11px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit;min-width:160px">
+        </label>
+      </header>
+
+      <div style="padding:28px 34px 60px;display:flex;flex-direction:column;gap:22px">
+
+        <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:16px">
+          <div style="background:oklch(0.26 0.018 155);color:oklch(0.94 0.006 140);border-radius:12px;padding:20px 22px">
+            <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.76 0.02 148)">Meta alcançada no mês</span>
+            <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px">
+              <span style="font-family:'Instrument Serif',Georgia,serif;font-size:52px;line-height:1">86<span style="font-size:30px">%</span></span>
+              <span style="font-size:12.5px;color:oklch(0.80 0.02 148);line-height:1.35">em <b style="font-weight:600">19 dias</b> com lançamento<br>2 dias fora da conta</span>
+            </div>
+            <div style="height:6px;border-radius:999px;background:oklch(0.36 0.02 155);margin-top:16px;overflow:hidden">
+              <div style="width:86%;height:100%;background:oklch(0.72 0.14 82)"></div>
+            </div>
+            <p style="margin:12px 0 0;font-size:11.5px;color:oklch(0.78 0.02 148);line-height:1.45">Média dos dias em que você lançou. Dias sem lançamento e dias de ausência ficam fora do cálculo — o número mede intensidade, não assiduidade.</p>
+          </div>
+          <div style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;justify-content:space-between">
+            <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Pontos no mês</span>
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:46px;line-height:1;margin-top:10px">218</span>
+            <span style="font-size:12px;color:oklch(0.52 0.012 150);margin-top:8px">28 lançamentos · média 11,5/dia</span>
+          </div>
+          <div style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;justify-content:space-between">
+            <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Aguardando chefia</span>
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:46px;line-height:1;margin-top:10px">4</span>
+            <span style="font-size:12px;color:oklch(0.52 0.012 150);margin-top:8px">24 aprovados por Exemplo Chefia SEORE</span>
+          </div>
+        </div>
+
+        <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;overflow:hidden">
+          <div style="padding:16px 20px;border-bottom:1px solid oklch(0.93 0.006 150);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+            <h2 style="font-size:15px;font-weight:600;margin:0">Meus lançamentos <span style="font-weight:400;color:oklch(0.55 0.012 150)">28</span></h2>
+            <button style="all:unset;cursor:pointer;font-size:12px;font-weight:600;color:oklch(0.43 0.05 148);border:1px solid oklch(0.86 0.02 148);border-radius:7px;padding:7px 13px" style-hover="background:oklch(0.965 0.014 148)">Exportar CSV</button>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 20px;border-bottom:1px solid oklch(0.90 0.006 150)">Data</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Atividade</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Compl.</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Pontos</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 20px;border-bottom:1px solid oklch(0.90 0.006 150)">Situação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" style="padding:9px 20px;background:oklch(0.975 0.004 140);border-bottom:1px solid oklch(0.94 0.006 150);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:oklch(0.45 0.012 150);font-weight:600">Terça, 05/08 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:oklch(0.55 0.012 150)">· 25 pontos</span></td>
+              </tr>
+              <tr>
+                <td style="padding:11px 20px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.55 0.012 150);white-space:nowrap">05/08</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);max-width:430px;line-height:1.4">Organizar, controlar e preservar o acervo bibliográfico físico e digital.</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">Média</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">10</td>
+                <td style="padding:11px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.95 0.03 85);color:oklch(0.48 0.09 82)">pendente</span></td>
+              </tr>
+              <tr>
+                <td style="padding:11px 20px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.55 0.012 150);white-space:nowrap">05/08</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);max-width:430px;line-height:1.4">Realizar atendimento presencial e remoto aos usuários, incluindo orientação quanto ao uso do acervo.</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">Média</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">10</td>
+                <td style="padding:11px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.94 0.03 148);color:oklch(0.42 0.05 148)">aprovado</span></td>
+              </tr>
+              <tr>
+                <td style="padding:11px 20px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.55 0.012 150);white-space:nowrap">05/08</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);max-width:430px;line-height:1.4">Receber, conferir e registrar materiais informacionais adquiridos ou recebidos em doação.</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">Baixa</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">5</td>
+                <td style="padding:11px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.95 0.03 85);color:oklch(0.48 0.09 82)">pendente</span></td>
+              </tr>
+              <tr>
+                <td colspan="5" style="padding:9px 20px;background:oklch(0.975 0.004 140);border-bottom:1px solid oklch(0.94 0.006 150);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:oklch(0.45 0.012 150);font-weight:600">Segunda, 04/08 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:oklch(0.55 0.012 150)">· 15 pontos</span></td>
+              </tr>
+              <tr>
+                <td style="padding:11px 20px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.55 0.012 150);white-space:nowrap">04/08</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);max-width:430px;line-height:1.4">Planejar e realizar visitas guiadas e ações de apresentação do acervo raro e especial.</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">Alta</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">15</td>
+                <td style="padding:11px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.94 0.03 148);color:oklch(0.42 0.05 148)">aprovado</span></td>
+              </tr>
+              <tr>
+                <td colspan="5" style="padding:9px 20px;background:oklch(0.975 0.004 140);border-bottom:1px solid oklch(0.94 0.006 150);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:oklch(0.45 0.012 150);font-weight:600">Sexta, 01/08 <span style="font-weight:400;text-transform:none;letter-spacing:0;color:oklch(0.55 0.012 150)">· 20 pontos</span></td>
+              </tr>
+              <tr>
+                <td style="padding:11px 20px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.55 0.012 150);white-space:nowrap">01/08</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);max-width:430px;line-height:1.4">Revisar, remanejar, ordenar e sinalizar materiais e coleções do acervo físico da Biblioteca.</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">Média</td>
+                <td style="padding:11px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">10</td>
+                <td style="padding:11px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.94 0.03 148);color:oklch(0.42 0.05 148)">aprovado</span></td>
+              </tr>
+              <tr>
+                <td style="padding:11px 20px;color:oklch(0.55 0.012 150);white-space:nowrap">01/08</td>
+                <td style="padding:11px 8px;max-width:430px;line-height:1.4">Elaborar boletins, sumários, bibliografias e alertas de divulgação do acervo.</td>
+                <td style="padding:11px 8px;color:oklch(0.50 0.012 150)">Média</td>
+                <td style="padding:11px 8px;text-align:right;font-variant-numeric:tabular-nums">10</td>
+                <td style="padding:11px 20px"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.94 0.03 148);color:oklch(0.42 0.05 148)">aprovado</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ---------- AUSÊNCIAS ---------- -->
+    <sc-if value="{{ vAus }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <header style="padding:26px 34px 20px;border-bottom:1px solid oklch(0.90 0.006 150);background:oklch(0.985 0.003 140)">
+        <h1 style="font-family:'Instrument Serif',Georgia,serif;font-size:29px;font-weight:400;margin:0;line-height:1.1">Ausências</h1>
+        <p style="margin:6px 0 0;color:oklch(0.52 0.012 150);font-size:13px;max-width:70ch">Períodos de afastamento. Não valem pontos e não passam por aprovação — servem para tirar da conta da meta os dias em que não havia como trabalhar.</p>
+      </header>
+      <div style="padding:28px 34px 60px;display:grid;grid-template-columns:360px minmax(0,1fr);gap:26px;align-items:start">
+        <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:22px">
+          <h2 style="font-size:15px;font-weight:600;margin:0 0 16px">Registrar período</h2>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <label style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Tipo</span>
+              <select style="font:inherit;font-size:14px;padding:10px 11px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit">
+                <option>Férias</option><option>Licença médica</option><option>Outras licenças</option>
+                <option>Banco de horas</option><option>Abono</option><option>Outro afastamento</option>
+              </select>
+            </label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <label style="display:flex;flex-direction:column;gap:5px">
+                <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Primeiro dia</span>
+                <input type="date" style="font:inherit;font-size:14px;padding:10px 11px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit;width:100%">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:5px">
+                <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Último dia</span>
+                <input type="date" style="font:inherit;font-size:14px;padding:10px 11px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit;width:100%">
+              </label>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Observações (opcional)</span>
+              <textarea placeholder="Ex.: número do processo, portaria, atestado" style="min-height:64px;resize:vertical;font:inherit;font-size:14px;padding:10px 11px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit"></textarea>
+            </label>
+            <button style="all:unset;cursor:pointer;text-align:center;background:oklch(0.43 0.05 148);color:#fff;font-size:14px;font-weight:600;padding:12px;border-radius:9px" style-hover="background:oklch(0.36 0.05 148)">Registrar ausência</button>
+            <p style="margin:0;font-size:11.5px;color:oklch(0.55 0.012 150);line-height:1.45">Períodos sobrepostos são recusados: contariam o mesmo dia duas vezes. A contagem é em dias corridos, incluindo as duas pontas.</p>
+          </div>
+        </section>
+
+        <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;overflow:hidden">
+          <div style="padding:16px 20px;border-bottom:1px solid oklch(0.93 0.006 150);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+            <h2 style="font-size:15px;font-weight:600;margin:0">Minhas ausências <span style="font-weight:400;color:oklch(0.55 0.012 150)">3</span></h2>
+            <button style="all:unset;cursor:pointer;font-size:12px;font-weight:600;color:oklch(0.43 0.05 148);border:1px solid oklch(0.86 0.02 148);border-radius:7px;padding:7px 13px" style-hover="background:oklch(0.965 0.014 148)">Exportar CSV</button>
+          </div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 20px;border-bottom:1px solid oklch(0.90 0.006 150)">Tipo</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Período</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Dias</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Observações</th>
+                <th style="border-bottom:1px solid oklch(0.90 0.006 150);padding:10px 20px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.94 0.03 148);color:oklch(0.42 0.05 148)">Férias</span></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);white-space:nowrap">28/08 — 10/09/2026</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">14</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">Processo 2026/0412</td>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right"><button style="all:unset;cursor:pointer;font-size:12px;color:oklch(0.50 0.13 25)" style-hover="text-decoration:underline">excluir</button></td>
+              </tr>
+              <tr>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.95 0.03 85);color:oklch(0.48 0.09 82)">Licença médica</span></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);white-space:nowrap">12/08 — 13/08/2026</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">2</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">Atestado entregue à chefia</td>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right"><button style="all:unset;cursor:pointer;font-size:12px;color:oklch(0.50 0.13 25)" style-hover="text-decoration:underline">excluir</button></td>
+              </tr>
+              <tr>
+                <td style="padding:12px 20px"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.96 0.004 150);color:oklch(0.45 0.012 150);border:1px solid oklch(0.90 0.006 150)">Banco de horas</span></td>
+                <td style="padding:12px 8px;white-space:nowrap">21/07 — 21/07/2026</td>
+                <td style="padding:12px 8px;text-align:right;font-variant-numeric:tabular-nums">1</td>
+                <td style="padding:12px 8px;color:oklch(0.50 0.012 150)">—</td>
+                <td style="padding:12px 20px;text-align:right"><button style="all:unset;cursor:pointer;font-size:12px;color:oklch(0.50 0.13 25)" style-hover="text-decoration:underline">excluir</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ---------- PAINEL ---------- -->
+    <sc-if value="{{ vPainel }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <header style="padding:26px 34px 0;border-bottom:1px solid oklch(0.90 0.006 150);background:oklch(0.985 0.003 140)">
+        <div style="display:flex;align-items:flex-end;gap:20px;flex-wrap:wrap">
+          <div style="flex:1 1 auto;min-width:0">
+            <h1 style="font-family:'Instrument Serif',Georgia,serif;font-size:29px;font-weight:400;margin:0;line-height:1.1">Painel da unidade</h1>
+            <p style="margin:6px 0 0;color:oklch(0.52 0.012 150);font-size:13px">SEORE · agosto de 2026 · 7 lançamentos aguardando sua aprovação</p>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;padding-bottom:2px">
+            <label style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Mês</span>
+              <input type="month" value="2026-08" style="font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Pessoa</span>
+              <select style="font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit"><option>Todas</option><option>Christiane Rocha</option><option>Silvia Regina</option></select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Situação</span>
+              <select style="font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit"><option>Todas</option><option>Pendentes</option><option>Aprovados</option></select>
+            </label>
+          </div>
+        </div>
+        <div style="display:flex;gap:2px;margin-top:22px">
+          <button onClick="{{ subLanc }}" style="all:unset;cursor:pointer;padding:11px 15px;font-size:13px;font-weight:600;border-bottom:2px solid {{ tbLanc }};color:{{ tcLanc }}">Aprovações <span style="font-weight:400">7</span></button>
+          <button onClick="{{ subVisao }}" style="all:unset;cursor:pointer;padding:11px 15px;font-size:13px;font-weight:600;border-bottom:2px solid {{ tbVisao }};color:{{ tcVisao }}">Visão do mês</button>
+          <button onClick="{{ subAus }}" style="all:unset;cursor:pointer;padding:11px 15px;font-size:13px;font-weight:600;border-bottom:2px solid {{ tbAus }};color:{{ tcAus }}">Ausências <span style="font-weight:400">3</span></button>
+        </div>
+      </header>
+
+      <!-- aba: aprovações -->
+      <sc-if value="{{ pLanc }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:26px 34px 60px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px">
+          <p style="margin:0;font-size:13px;color:oklch(0.52 0.012 150)">28 lançamentos no mês · <b style="font-weight:600;color:oklch(0.48 0.09 82)">7 pendentes</b></p>
+          <div style="display:flex;gap:10px">
+            <button style="all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:oklch(0.43 0.05 148);border:1px solid oklch(0.86 0.02 148);border-radius:7px;padding:8px 14px" style-hover="background:oklch(0.965 0.014 148)">Exportar CSV</button>
+            <button style="all:unset;cursor:pointer;font-size:12.5px;font-weight:600;background:oklch(0.43 0.05 148);color:#fff;border-radius:7px;padding:8px 14px" style-hover="background:oklch(0.36 0.05 148)">Aprovar os 7 pendentes</button>
+          </div>
+        </div>
+        <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;overflow:hidden">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr>
+                <th style="width:34px;padding:10px 0 10px 20px;border-bottom:1px solid oklch(0.90 0.006 150)"><input type="checkbox"></th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Data</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Pessoa</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Atividade</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Pontos</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 20px;border-bottom:1px solid oklch(0.90 0.006 150)">Situação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background:oklch(0.99 0.008 85)">
+                <td style="padding:12px 0 12px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"><input type="checkbox" checked></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.55 0.012 150);white-space:nowrap">05/08</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);white-space:nowrap">Christiane Rocha</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);max-width:380px;line-height:1.4">Organizar, controlar e preservar o acervo bibliográfico físico e digital.<span style="display:block;font-size:11.5px;color:oklch(0.55 0.012 150);margin-top:3px">Média · Gerir acervo bibliográfico</span></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">10</td>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right"><button style="all:unset;cursor:pointer;font-size:12px;font-weight:600;background:oklch(0.43 0.05 148);color:#fff;border-radius:6px;padding:6px 12px" style-hover="background:oklch(0.36 0.05 148)">Aprovar</button></td>
+              </tr>
+              <tr style="background:oklch(0.99 0.008 85)">
+                <td style="padding:12px 0 12px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"><input type="checkbox" checked></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.55 0.012 150);white-space:nowrap">05/08</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);white-space:nowrap">Silvia Regina</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);max-width:380px;line-height:1.4">Realizar prospecção, seleção e curadoria de documentos raros e especiais para exposições.<span style="display:block;font-size:11.5px;color:oklch(0.55 0.012 150);margin-top:3px">Alta · Desenvolver produtos de informação</span></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">15</td>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right"><button style="all:unset;cursor:pointer;font-size:12px;font-weight:600;background:oklch(0.43 0.05 148);color:#fff;border-radius:6px;padding:6px 12px" style-hover="background:oklch(0.36 0.05 148)">Aprovar</button></td>
+              </tr>
+              <tr style="background:oklch(0.99 0.008 85)">
+                <td style="padding:12px 0 12px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"><input type="checkbox"></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.55 0.012 150);white-space:nowrap">04/08</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);white-space:nowrap">Christiane Rocha</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);max-width:380px;line-height:1.4">Receber, conferir e registrar materiais informacionais adquiridos ou recebidos em doação.<span style="display:block;font-size:11.5px;color:oklch(0.55 0.012 150);margin-top:3px">Baixa · Desenvolver acervo bibliográfico</span></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">5</td>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right"><button style="all:unset;cursor:pointer;font-size:12px;font-weight:600;background:oklch(0.43 0.05 148);color:#fff;border-radius:6px;padding:6px 12px" style-hover="background:oklch(0.36 0.05 148)">Aprovar</button></td>
+              </tr>
+              <tr>
+                <td style="padding:12px 0 12px 20px;border-bottom:1px solid oklch(0.95 0.004 150)"></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.55 0.012 150);white-space:nowrap">04/08</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);white-space:nowrap">Silvia Regina</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);max-width:380px;line-height:1.4">Elaborar boletins, sumários, bibliografias, alertas e demais produtos de divulgação do acervo.<span style="display:block;font-size:11.5px;color:oklch(0.55 0.012 150);margin-top:3px">Média · Desenvolver produtos de informação</span></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">10</td>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right"><span style="font-size:11.5px;color:oklch(0.42 0.05 148)">aprovado em 04/08</span></td>
+              </tr>
+              <tr>
+                <td style="padding:12px 0 12px 20px"></td>
+                <td style="padding:12px 8px;color:oklch(0.55 0.012 150);white-space:nowrap">01/08</td>
+                <td style="padding:12px 8px;white-space:nowrap">Christiane Rocha</td>
+                <td style="padding:12px 8px;max-width:380px;line-height:1.4">Revisar, remanejar, ordenar e sinalizar materiais e coleções do acervo físico.<span style="display:block;font-size:11.5px;color:oklch(0.55 0.012 150);margin-top:3px">Média · Gerir acervo bibliográfico</span></td>
+                <td style="padding:12px 8px;text-align:right;font-variant-numeric:tabular-nums">10</td>
+                <td style="padding:12px 20px;text-align:right"><span style="font-size:11.5px;color:oklch(0.42 0.05 148)">aprovado em 01/08</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+      </sc-if>
+
+      <!-- aba: visão do mês -->
+      <sc-if value="{{ pVisao }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:26px 34px 60px;display:flex;flex-direction:column;gap:22px">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+          <div style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:11px;padding:16px 18px">
+            <span style="display:block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Lançamentos</span>
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:34px;line-height:1.1">28</span>
+          </div>
+          <div style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:11px;padding:16px 18px">
+            <span style="display:block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Pontos</span>
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:34px;line-height:1.1">305</span>
+          </div>
+          <div style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:11px;padding:16px 18px">
+            <span style="display:block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Aprovados</span>
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:34px;line-height:1.1">75<span style="font-size:19px;color:oklch(0.52 0.012 150)">%</span></span>
+          </div>
+          <div style="background:#fff;border:1px solid oklch(0.90 0.02 85);border-radius:11px;padding:16px 18px">
+            <span style="display:block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:oklch(0.48 0.09 82);font-weight:600">Pendentes</span>
+            <span style="font-family:'Instrument Serif',Georgia,serif;font-size:34px;line-height:1.1;color:oklch(0.48 0.09 82)">7</span>
+          </div>
+        </div>
+
+        <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:20px 22px 22px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:6px">
+            <h2 style="font-size:14.5px;font-weight:600;margin:0">Atividades por pessoa e complexidade</h2>
+            <div style="display:flex;gap:14px;align-items:center;font-size:11.5px;color:oklch(0.52 0.012 150)">
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:oklch(0.82 0.06 240)"></span>baixa</span>
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:oklch(0.62 0.13 250)"></span>média</span>
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:oklch(0.40 0.12 255)"></span>alta</span>
+              <button style="all:unset;cursor:pointer;color:oklch(0.43 0.05 148);font-weight:600;text-decoration:underline">ordenar por volume</button>
+            </div>
+          </div>
+          <p style="margin:0 0 18px;font-size:12px;color:oklch(0.55 0.012 150);max-width:78ch">O comprimento da barra é o número de atividades. Serve para ver distribuição e carga — não é comparação de desempenho: o gráfico não desconta ausências nem normaliza por jornada.</p>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:grid;grid-template-columns:170px minmax(0,1fr) 44px;gap:14px;align-items:center">
+              <span style="font-size:13px;text-align:right">Christiane Rocha</span>
+              <span style="display:flex;height:22px;border-radius:4px;overflow:hidden;background:oklch(0.96 0.004 150)">
+                <span style="width:18%;background:oklch(0.82 0.06 240)"></span>
+                <span style="width:46%;background:oklch(0.62 0.13 250)"></span>
+                <span style="width:11%;background:oklch(0.40 0.12 255)"></span>
+              </span>
+              <span style="font-size:13px;font-variant-numeric:tabular-nums;color:oklch(0.45 0.012 150)">17</span>
+            </div>
+            <div style="display:grid;grid-template-columns:170px minmax(0,1fr) 44px;gap:14px;align-items:center">
+              <span style="font-size:13px;text-align:right">Silvia Regina</span>
+              <span style="display:flex;height:22px;border-radius:4px;overflow:hidden;background:oklch(0.96 0.004 150)">
+                <span style="width:9%;background:oklch(0.82 0.06 240)"></span>
+                <span style="width:23%;background:oklch(0.62 0.13 250)"></span>
+                <span style="width:20%;background:oklch(0.40 0.12 255)"></span>
+              </span>
+              <span style="font-size:13px;font-variant-numeric:tabular-nums;color:oklch(0.45 0.012 150)">11</span>
+            </div>
+            <div style="display:grid;grid-template-columns:170px minmax(0,1fr) 44px;gap:14px;align-items:center">
+              <span style="font-size:13px;text-align:right;color:oklch(0.52 0.012 150)">Exemplo Chefia SEORE</span>
+              <span style="display:flex;height:22px;border-radius:4px;overflow:hidden;background:oklch(0.96 0.004 150)">
+                <span style="width:4%;background:oklch(0.82 0.06 240)"></span>
+                <span style="width:9%;background:oklch(0.62 0.13 250)"></span>
+                <span style="width:9%;background:oklch(0.40 0.12 255)"></span>
+              </span>
+              <span style="font-size:13px;font-variant-numeric:tabular-nums;color:oklch(0.45 0.012 150)">6</span>
+            </div>
+          </div>
+        </section>
+
+        <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:20px 22px 22px">
+          <h2 style="font-size:14.5px;font-weight:600;margin:0 0 16px">Resumo por pessoa</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px">
+            <div style="border:1px solid oklch(0.92 0.006 150);border-radius:10px;padding:13px 15px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+                <span style="font-size:13px;font-weight:600">Christiane Rocha</span>
+                <span style="font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:oklch(0.95 0.03 85);color:oklch(0.48 0.09 82)">86%</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:7px;margin-top:6px">
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:24px;line-height:1">218</span>
+                <span style="font-size:11.5px;color:oklch(0.52 0.012 150)">pontos · 17 lançamentos · 19 dias</span>
+              </div>
+            </div>
+            <div style="border:1px solid oklch(0.92 0.006 150);border-radius:10px;padding:13px 15px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+                <span style="font-size:13px;font-weight:600">Silvia Regina</span>
+                <span style="font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:oklch(0.94 0.03 148);color:oklch(0.42 0.05 148)">104%</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:7px;margin-top:6px">
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:24px;line-height:1">142</span>
+                <span style="font-size:11.5px;color:oklch(0.52 0.012 150)">pontos · 11 lançamentos · 9 dias</span>
+              </div>
+            </div>
+            <div style="border:1px solid oklch(0.92 0.006 150);border-radius:10px;padding:13px 15px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+                <span style="font-size:13px;font-weight:600">Exemplo Chefia SEORE</span>
+                <span style="font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:oklch(0.96 0.004 150);color:oklch(0.50 0.012 150);border:1px solid oklch(0.90 0.006 150)">—</span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:7px;margin-top:6px">
+                <span style="font-family:'Instrument Serif',Georgia,serif;font-size:24px;line-height:1">65</span>
+                <span style="font-size:11.5px;color:oklch(0.52 0.012 150)">pontos · 6 lançamentos · sem carga</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      </sc-if>
+
+      <!-- aba: ausências da equipe -->
+      <sc-if value="{{ pAus }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:26px 34px 60px">
+        <p style="margin:0 0 16px;font-size:13px;color:oklch(0.52 0.012 150);max-width:80ch">Ausências das pessoas da SEORE que encostam em agosto de 2026. Você enxerga, mas não exclui — quem registra é a própria pessoa.</p>
+        <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;overflow:hidden">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 20px;border-bottom:1px solid oklch(0.90 0.006 150)">Pessoa</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Tipo</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Período</th>
+                <th style="text-align:right;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Dias</th>
+                <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 20px;border-bottom:1px solid oklch(0.90 0.006 150)">Observações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150)">Christiane Rocha</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.94 0.03 148);color:oklch(0.42 0.05 148)">Férias</span></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);white-space:nowrap">28/08 — 10/09/2026</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">14</td>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">Processo 2026/0412</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150)">Christiane Rocha</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.95 0.03 85);color:oklch(0.48 0.09 82)">Licença médica</span></td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);white-space:nowrap">12/08 — 13/08/2026</td>
+                <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right;font-variant-numeric:tabular-nums">2</td>
+                <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">Atestado entregue à chefia</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 20px">Silvia Regina</td>
+                <td style="padding:12px 8px"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.96 0.004 150);color:oklch(0.45 0.012 150);border:1px solid oklch(0.90 0.006 150)">Banco de horas</span></td>
+                <td style="padding:12px 8px;white-space:nowrap">18/08 — 19/08/2026</td>
+                <td style="padding:12px 8px;text-align:right;font-variant-numeric:tabular-nums">2</td>
+                <td style="padding:12px 20px;color:oklch(0.50 0.012 150)">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- ---------- ADMINISTRAÇÃO ---------- -->
+    <sc-if value="{{ vAdm }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <header style="padding:26px 34px 20px;border-bottom:1px solid oklch(0.90 0.006 150);background:oklch(0.985 0.003 140)">
+        <h1 style="font-family:'Instrument Serif',Georgia,serif;font-size:29px;font-weight:400;margin:0;line-height:1.1">Administração</h1>
+        <p style="margin:6px 0 0;color:oklch(0.52 0.012 150);font-size:13px;max-width:76ch">Gravado no <code style="font-family:ui-monospace,Consolas,monospace;font-size:12px">config.json</code> da pasta central; vale para todos ao recarregarem os dados. Processos e atividades continuam no <code style="font-family:ui-monospace,Consolas,monospace;font-size:12px">catalogo.js</code> do aplicativo.</p>
+      </header>
+      <div style="padding:28px 34px 60px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:26px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:22px;min-width:0">
+          <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid oklch(0.93 0.006 150);display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+              <h2 style="font-size:15px;font-weight:600;margin:0">Senhas</h2>
+              <label style="display:flex;gap:8px;align-items:center;font-size:12.5px;color:oklch(0.45 0.012 150)"><input type="checkbox"> Exigir senha de todas as pessoas</label>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead>
+                <tr>
+                  <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 20px;border-bottom:1px solid oklch(0.90 0.006 150)">Pessoa</th>
+                  <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Papel · Unidade</th>
+                  <th style="text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;padding:10px 8px;border-bottom:1px solid oklch(0.90 0.006 150)">Senha</th>
+                  <th style="border-bottom:1px solid oklch(0.90 0.006 150);padding:10px 20px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150)">Christiane Rocha</td>
+                  <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">servidora · SEORE</td>
+                  <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.94 0.03 148);color:oklch(0.42 0.05 148)">definida</span></td>
+                  <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right"><button style="all:unset;cursor:pointer;font-size:12px;font-weight:600;color:oklch(0.43 0.05 148)" style-hover="text-decoration:underline">alterar</button></td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150)">Silvia Regina</td>
+                  <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150);color:oklch(0.50 0.012 150)">servidora · SEORE</td>
+                  <td style="padding:12px 8px;border-bottom:1px solid oklch(0.95 0.004 150)"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.96 0.004 150);color:oklch(0.45 0.012 150);border:1px solid oklch(0.90 0.006 150)">sem senha</span></td>
+                  <td style="padding:12px 20px;border-bottom:1px solid oklch(0.95 0.004 150);text-align:right"><button style="all:unset;cursor:pointer;font-size:12px;font-weight:600;color:oklch(0.43 0.05 148)" style-hover="text-decoration:underline">definir</button></td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 20px">Administrador</td>
+                  <td style="padding:12px 8px;color:oklch(0.50 0.012 150)">adm · —</td>
+                  <td style="padding:12px 8px"><span style="font-size:10.5px;font-weight:600;border-radius:999px;padding:2px 9px;background:oklch(0.93 0.06 25);color:oklch(0.45 0.13 25)">senha inicial</span></td>
+                  <td style="padding:12px 20px;text-align:right"><button style="all:unset;cursor:pointer;font-size:12px;font-weight:600;color:oklch(0.43 0.05 148)" style-hover="text-decoration:underline">alterar</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:20px 22px 22px">
+            <h2 style="font-size:15px;font-weight:600;margin:0 0 4px">Catálogo de unidades e pessoas</h2>
+            <p style="margin:0 0 14px;font-size:12.5px;color:oklch(0.52 0.012 150);max-width:74ch">Renomear uma pessoa desvincula a senha e o arquivo de lançamentos do nome antigo.</p>
+            <textarea spellcheck="false" style="width:100%;min-height:210px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;line-height:1.6;padding:14px;border:1px solid oklch(0.88 0.008 150);border-radius:9px;background:oklch(0.985 0.003 140);color:inherit" style-focus="border-color:oklch(0.43 0.05 148);outline:3px solid oklch(0.93 0.03 148)">{
+  "SEORE": {
+    "chefia": "Exemplo Chefia SEORE",
+    "servidores": ["Christiane Rocha", "Silvia Regina"]
+  },
+  "SEACE": { "chefia": null, "servidores": [] },
+  "SEARI": { "chefia": null, "servidores": [] }
+}</textarea>
+            <div style="display:flex;gap:12px;align-items:center;margin-top:14px">
+              <button style="all:unset;cursor:pointer;background:oklch(0.43 0.05 148);color:#fff;font-size:13.5px;font-weight:600;padding:11px 20px;border-radius:8px" style-hover="background:oklch(0.36 0.05 148)">Salvar catálogo</button>
+              <span style="font-size:12px;color:oklch(0.52 0.012 150)">Validado antes de gravar</span>
+            </div>
+          </section>
+        </div>
+
+        <aside style="display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:18px 20px">
+            <span style="display:block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;margin-bottom:8px">Pasta oficial</span>
+            <p style="margin:0;font-size:12.5px;line-height:1.5;color:oklch(0.40 0.012 150)">Oficializada em 14/03/2026 por Administrador.</p>
+            <p style="margin:8px 0 0;font-family:ui-monospace,Consolas,monospace;font-size:11.5px;color:oklch(0.52 0.012 150);overflow-wrap:anywhere">selo: 8f31-a207-6d44</p>
+            <p style="margin:10px 0 0;font-size:11.5px;color:oklch(0.55 0.012 150);line-height:1.45">Pastas com selo diferente são recusadas nos computadores já vinculados — só o adm confirma a troca.</p>
+          </div>
+          <div style="background:oklch(0.98 0.012 85);border:1px solid oklch(0.90 0.03 85);border-radius:12px;padding:18px 20px">
+            <span style="display:block;font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:oklch(0.48 0.09 82);font-weight:600;margin-bottom:8px">Alcance da senha</span>
+            <p style="margin:0;font-size:12.5px;line-height:1.5;color:oklch(0.38 0.04 82)">A senha impede o uso casual de identidade alheia dentro do aplicativo. Não impede a edição direta dos arquivos na pasta — para isso, permissões NTFS.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ---------- ENTRADA (pasta + identidade) ---------- -->
+    <sc-if value="{{ vEntrada }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:48px 34px">
+      <div style="width:100%;max-width:520px">
+        <h1 style="font-family:'Instrument Serif',Georgia,serif;font-size:32px;font-weight:400;margin:0 0 6px;line-height:1.1">Quem é você?</h1>
+        <p style="margin:0 0 26px;color:oklch(0.52 0.012 150);font-size:13.5px">Duas etapas, uma vez só por computador. Depois disso a tela abre direto no lançamento.</p>
+
+        <div style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:20px 22px;margin-bottom:14px;display:flex;gap:14px;align-items:flex-start">
+          <span style="width:24px;height:24px;flex:none;border-radius:50%;background:oklch(0.94 0.03 148);color:oklch(0.40 0.05 148);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">✓</span>
+          <div style="min-width:0">
+            <h2 style="font-size:14.5px;font-weight:600;margin:0 0 3px">Pasta da rede conectada</h2>
+            <p style="margin:0;font-size:12.5px;color:oklch(0.52 0.012 150);overflow-wrap:anywhere"><code style="font-family:ui-monospace,Consolas,monospace;font-size:12px">\\COBIB\AmbienteTrabalho\unidadeCentral</code> · pasta oficial</p>
+          </div>
+          <button style="all:unset;cursor:pointer;margin-left:auto;font-size:12px;font-weight:600;color:oklch(0.43 0.05 148);white-space:nowrap" style-hover="text-decoration:underline">trocar</button>
+        </div>
+
+        <div style="background:#fff;border:1px solid oklch(0.90 0.006 150);border-radius:12px;padding:22px">
+          <h2 style="font-size:14.5px;font-weight:600;margin:0 0 16px">Identificação</h2>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <label style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Seu nome</span>
+              <select style="font:inherit;font-size:14px;padding:11px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit"><option>Christiane Rocha — servidora, SEORE</option><option>Silvia Regina — servidora, SEORE</option><option>Exemplo Chefia SEORE — chefia da unidade</option><option>Administrador</option></select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">Senha</span>
+              <input type="password" style="font:inherit;font-size:14px;padding:11px;border:1px solid oklch(0.88 0.008 150);border-radius:8px;background:#fff;color:inherit" style-focus="border-color:oklch(0.43 0.05 148);outline:3px solid oklch(0.93 0.03 148)">
+            </label>
+            <div>
+              <span style="display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600;margin-bottom:7px">Carga horária diária</span>
+              <div style="display:flex;gap:10px">
+                <button style="all:unset;cursor:pointer;flex:1;border:1.5px solid oklch(0.89 0.008 150);border-radius:9px;padding:12px;text-align:center" style-hover="border-color:oklch(0.43 0.05 148)"><span style="font-family:'Instrument Serif',Georgia,serif;font-size:22px;display:block;line-height:1">8</span><span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.52 0.012 150);font-weight:600">horas · meta 15/dia</span></button>
+                <button style="all:unset;cursor:pointer;flex:1;border:1.5px solid oklch(0.43 0.05 148);background:oklch(0.965 0.014 148);border-radius:9px;padding:12px;text-align:center"><span style="font-family:'Instrument Serif',Georgia,serif;font-size:22px;display:block;line-height:1;color:oklch(0.40 0.05 148)">6</span><span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:oklch(0.40 0.05 148);font-weight:600">horas · meta 11/dia</span></button>
+              </div>
+              <p style="margin:8px 0 0;font-size:11.5px;color:oklch(0.55 0.012 150)">Autodeclarada e obrigatória: é o que torna comparáveis quem cumpre 6 h e quem cumpre 8 h.</p>
+            </div>
+            <button onClick="{{ irLancar }}" style="all:unset;cursor:pointer;text-align:center;background:oklch(0.43 0.05 148);color:#fff;font-size:14px;font-weight:600;padding:13px;border-radius:9px" style-hover="background:oklch(0.36 0.05 148)">Confirmar identidade</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+  </main>
+
+  <!-- ==================== RECIBO ==================== -->
+  <sc-if value="{{ reciboAberto }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:80;background:oklch(0.24 0.02 155 / .48);display:flex;align-items:center;justify-content:center;padding:24px">
+    <div style="width:100%;max-width:470px;background:#fff;border-radius:14px;padding:26px 28px;box-shadow:0 24px 60px oklch(0.24 0.02 155 / .3)">
+      <div style="display:flex;gap:12px;align-items:center">
+        <span style="width:28px;height:28px;flex:none;border-radius:50%;background:oklch(0.94 0.03 148);color:oklch(0.40 0.05 148);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600">✓</span>
+        <h2 style="font-family:'Instrument Serif',Georgia,serif;font-size:23px;font-weight:400;margin:0">Lançamento gravado na rede</h2>
+      </div>
+      <dl style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px 18px;margin:20px 0 0;font-size:13px">
+        <dt style="font-weight:600;color:oklch(0.52 0.012 150);white-space:nowrap">Data</dt><dd style="margin:0">05/08/2026</dd>
+        <dt style="font-weight:600;color:oklch(0.52 0.012 150);white-space:nowrap">Atividade</dt><dd style="margin:0;line-height:1.45">{{ atividade }}</dd>
+        <dt style="font-weight:600;color:oklch(0.52 0.012 150);white-space:nowrap">Processo</dt><dd style="margin:0">{{ processo }}</dd>
+        <dt style="font-weight:600;color:oklch(0.52 0.012 150);white-space:nowrap">Complexidade</dt><dd style="margin:0">{{ complRotulo }}</dd>
+        <dt style="font-weight:600;color:oklch(0.52 0.012 150);white-space:nowrap">Situação</dt><dd style="margin:0">Pendente de aprovação pela chefia da SEORE</dd>
+      </dl>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px;padding-top:16px;border-top:1px solid oklch(0.93 0.006 150)">
+        <span style="font-size:13px;color:oklch(0.45 0.012 150)">Total no mês: <b style="font-family:'Instrument Serif',Georgia,serif;font-size:17px;font-weight:400">228</b> pontos</span>
+        <button onClick="{{ fecharRecibo }}" style="all:unset;cursor:pointer;background:oklch(0.43 0.05 148);color:#fff;font-size:13.5px;font-weight:600;padding:11px 22px;border-radius:8px" style-hover="background:oklch(0.36 0.05 148)">Fechar</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;versao&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;beta 13 · ago/26&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Cabeçalho&quot;}}">
+class Component extends DCLogic {
+  state = {
+    view: "lancar",
+    sub: "lanc",
+    buscaAberta: false,
+    recibo: false,
+    compl: "m",
+    atividade: "Organizar, controlar e preservar o acervo bibliográfico físico e digital.",
+    processo: "Gerir acervo bibliográfico impresso e digital"
+  };
+
+  nav(v) { return () => this.setState({ view: v, buscaAberta: false }); }
+  pick(t, p) { return () => this.setState({ atividade: t, processo: p, buscaAberta: false }); }
+
+  renderVals() {
+    const s = this.state;
+    const V = (k) => s.view === k;
+    const on = "oklch(0.43 0.05 148)", off = "transparent";
+    const item = (k) => ({
+      bg: V(k) ? "oklch(0.33 0.025 155)" : "transparent",
+      fg: V(k) ? "oklch(0.98 0.008 140)" : "oklch(0.86 0.01 140)",
+      dot: V(k) ? "oklch(0.72 0.16 148)" : "oklch(0.44 0.02 155)"
+    });
+    const L = item("lancar"), M = item("mes"), A = item("aus"), P = item("painel"), D = item("adm");
+    const tab = (k) => ({
+      b: s.sub === k ? on : "transparent",
+      c: s.sub === k ? "oklch(0.30 0.02 150)" : "oklch(0.52 0.012 150)"
+    });
+    const TL = tab("lanc"), TV = tab("visao"), TA = tab("aus");
+    const chip = (k) => ({
+      bd: s.compl === k ? on : "oklch(0.89 0.008 150)",
+      bg: s.compl === k ? "oklch(0.965 0.014 148)" : "#fff",
+      fg: s.compl === k ? "oklch(0.38 0.05 148)" : "oklch(0.45 0.012 150)"
+    });
+    const CB = chip("b"), CM = chip("m"), CA = chip("a");
+    const rot = { b: "Baixa (5 pontos)", m: "Média (10 pontos)", a: "Alta (15 pontos)" };
+
+    return {
+      versao: this.props.versao ?? "beta 13 · ago/26",
+      vLancar: V("lancar"), vMes: V("mes"), vAus: V("aus"),
+      vPainel: V("painel"), vAdm: V("adm"), vEntrada: V("entrada"),
+      irLancar: this.nav("lancar"), irMes: this.nav("mes"), irAus: this.nav("aus"),
+      irPainel: this.nav("painel"), irAdm: this.nav("adm"), irEntrada: this.nav("entrada"),
+      bgLancar: L.bg, fgLancar: L.fg, dotLancar: L.dot,
+      bgMes: M.bg, fgMes: M.fg, dotMes: M.dot,
+      bgAus: A.bg, fgAus: A.fg, dotAus: A.dot,
+      bgPainel: P.bg, fgPainel: P.fg, dotPainel: P.dot,
+      bgAdm: D.bg, fgAdm: D.fg, dotAdm: D.dot,
+      pLanc: s.sub === "lanc", pVisao: s.sub === "visao", pAus: s.sub === "aus",
+      subLanc: () => this.setState({ sub: "lanc" }),
+      subVisao: () => this.setState({ sub: "visao" }),
+      subAus: () => this.setState({ sub: "aus" }),
+      tbLanc: TL.b, tcLanc: TL.c, tbVisao: TV.b, tcVisao: TV.c, tbAus: TA.b, tcAus: TA.c,
+      buscaAberta: s.buscaAberta,
+      abrirBusca: () => this.setState({ buscaAberta: true }),
+      atividade: s.atividade, processo: s.processo,
+      complRotulo: rot[s.compl],
+      escolher1: this.pick("Organizar, controlar e preservar o acervo bibliográfico físico e digital.", "Gerir acervo bibliográfico impresso e digital"),
+      escolher2: this.pick("Receber, conferir, registrar e disponibilizar fascículos de jornais, periódicos e demais materiais incorporados ao acervo bibliográfico.", "Gerir acervo bibliográfico impresso e digital"),
+      escolher3: this.pick("Identificar, selecionar e encaminhar materiais informacionais para higienização, encadernação, restauração, desinfecção e demais ações de preservação.", "Gerir acervo bibliográfico impresso e digital"),
+      escolher4: this.pick("Revisar, remanejar, ordenar e sinalizar materiais e coleções do acervo físico da Biblioteca.", "Gerir acervo bibliográfico impresso e digital"),
+      escolher5: this.pick("Supervisionar e manter a organização, conservação e integridade do acervo bibliográfico da COBIB.", "Gerir acervo bibliográfico impresso e digital"),
+      selBaixa: () => this.setState({ compl: "b" }),
+      selMedia: () => this.setState({ compl: "m" }),
+      selAlta: () => this.setState({ compl: "a" }),
+      bdBaixa: CB.bd, bgBaixa: CB.bg, fgBaixa: CB.fg,
+      bdMedia: CM.bd, bgMedia: CM.bg, fgMedia: CM.fg,
+      bdAlta: CA.bd, bgAlta: CA.bg, fgAlta: CA.fg,
+      reciboAberto: s.recibo,
+      abrirRecibo: () => this.setState({ recibo: true }),
+      fecharRecibo: () => this.setState({ recibo: false })
+    };
+  }
+}
+
+</script>
+</body>
+</html>
