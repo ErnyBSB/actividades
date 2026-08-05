@@ -1,0 +1,58 @@
+MAQUETE DE REDESENHO — NÃO É O APLICATIVO
+=========================================
+
+Esta pasta guarda uma PROPOSTA VISUAL do Programa de Resultados, feita
+depois da v13. Ela está aqui como referência de desenho — o registro do
+que se decidiu e por quê. Não é código do aplicativo e não deve ser
+publicada, copiada para uma pasta vN nem aberta pelos servidores.
+
+Quem implementa a proposta é a v14, em versionBeta/v14, escrita do zero
+em HTML, CSS e JavaScript puros.
+
+Por que a maquete não pode ser publicada
+----------------------------------------
+Ela contraria o objetivo nº 1 do projeto — zero infraestrutura. Ao ser
+aberta, a maquete baixa da internet:
+
+  React 18.3.1          unpkg.com
+  ReactDOM 18.3.1       unpkg.com
+  Babel standalone      unpkg.com   (compila no navegador, a cada carga)
+  Instrument Sans/Serif fonts.googleapis.com
+
+Aberta de \\COBIB\AmbienteTrabalho\unidadeCentral numa máquina sem
+internet — que é exatamente o cenário para o qual este aplicativo
+existe — a tela fica EM BRANCO. O service worker do aplicativo é
+"primeiro o cache" justamente para que isso nunca aconteça.
+
+Além disso, os dados da maquete são todos fixos no próprio arquivo: os
+nomes das pessoas, as atividades, os percentuais. Ela não lê nem grava
+nada na pasta da rede — não chama a rede.js nem o catalogo.js.
+
+O que tem dentro
+----------------
+  v13/index.html    a maquete: um <x-dc> com uma classe DCLogic
+  v13/support.js    runtime gerado que renderiza esse <x-dc> (React)
+
+Os demais arquivos de v13/ (catalogo.js, rede.js, sw.js, echarts.min.js,
+manifest, gerar-senha.html, icons/ e um LEIA-ME.txt) são cópias da v13
+que vieram junto no pacote e que a maquete NÃO carrega. Ficaram para o
+pacote continuar íntegro. Em especial: o LEIA-ME.txt lá dentro é o da
+v13, não a documentação da v14 — para essa, veja versionBeta/v14.
+
+O que foi aproveitado, e o que não foi
+--------------------------------------
+Aproveitado na v14 (ver o LEIA-ME de lá, seção "De onde veio o
+desenho"): o rail de navegação com os grupos Meu trabalho / Gestão, o
+contador de pendentes no rail, o lançamento em três passos com a coluna
+de efeito imediato, o caminho do arquivo sob o botão, o cartão de meta
+que se explica, as abas do painel, o botão Aprovar por linha e o
+cabeçalho de dia com o total.
+
+Não aproveitado: React, o CDN, as fontes remotas, os estilos escritos em
+atributo (eram 548) e o all:unset nos botões, que apaga o anel de foco e
+cega quem navega por teclado. As cores, escritas em oklch(), foram
+convertidas para hexadecimal na v14.
+
+Faltava na maquete, e foi acrescentado na v14: tratamento de tela
+estreita (a maquete não tinha nenhuma media query — o rail era fixo em
+244 pixels) e o anel de foco.
