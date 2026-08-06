@@ -52,7 +52,11 @@ button{font-family:inherit}
 .rail{flex:0 0 244px; background:var(--rail); color:var(--rail-texto);
   display:flex; flex-direction:column; position:sticky; top:0; height:100vh}
 .rail-topo{padding:22px 20px 18px; border-bottom:1px solid var(--rail-linha)}
-.marca{font-family:var(--serif); font-size:26px; line-height:1; color:#F9FBF9}
+/* O nome é o do programa, por extenso. Em duas linhas dentro dos 244px do
+   rail: o espaço entre "Programa" e "de" é inseparável no HTML, para a
+   quebra cair sempre antes de "Resultados" e nunca deixar o "de" sozinho. */
+.marca{display:block; font-family:var(--serif); font-size:23px; line-height:1.1;
+  color:#F9FBF9}
 .marca-sub{display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap}
 .marca-sub .org{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--rail-mudo)}
 .marca-sub .versao{font-size:10.5px; letter-spacing:.04em; color:var(--rail-mudo);
@@ -389,7 +393,7 @@ dialog h2{font-family:var(--serif); font-weight:400; font-size:21px; margin:0 0 
      não fiscaliza nada não vê o segundo grupo. -->
 <nav class="rail">
   <div class="rail-topo">
-    <span class="marca">Resultados</span>
+    <span class="marca">Programa&nbsp;de Resultados</span>
     <div class="marca-sub">
       <span class="org">COBIB</span>
       <span class="versao">versão beta 14 (ago/26)</span>

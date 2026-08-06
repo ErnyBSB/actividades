@@ -125,6 +125,26 @@ O filtro opcional por processo não mudou: cada atividade continua sabendo
 de que processo veio. O que ficou de fora é a ordem do próprio seletor de
 processos, que segue a do catálogo — a issue pedia a lista de atividades.
 
+O nome no alto do rail
+----------------------
+Estava escrito só "Resultados". O programa se chama PROGRAMA DE
+RESULTADOS, e é assim que ele aparece na portaria, no e-mail que a pessoa
+recebeu e no título da janela do navegador — só na tela é que estava
+abreviado. Quem abrisse o aplicativo pela primeira vez não tinha como
+ligar uma coisa à outra.
+
+O nome por extenso não cabe em uma linha nos 244px do rail, então ocupa
+duas. A quebra é forçada a cair antes de "Resultados": o espaço entre
+"Programa" e "de" é inseparável (&nbsp;), senão em certas larguras a
+primeira linha terminava com um "de" solto. O tamanho da letra baixou de
+26px para 23px para as duas linhas caberem sem apertar a etiqueta da
+versão, logo abaixo.
+
+O nome curto do ícone instalado (manifest.webmanifest, "Programa
+Resultados") não mudou: ali o sistema operacional corta o que passa de
+uns doze caracteres, e "Programa de Resultados" apareceria cortado no
+meio de qualquer jeito.
+
 MEU MÊS — a meta em tamanho grande, com a explicação do que ela mede
 LOGO ABAIXO do número, e não escondida numa dica: "média dos dias em que
 você lançou; dias sem lançamento e de ausência ficam fora do cálculo —
