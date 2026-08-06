@@ -1659,16 +1659,22 @@ $("selProcesso").addEventListener("change", () => abrirLista(true));
 
 /* ---- Atividades frequentes: derivadas dos próprios lançamentos ---- */
 /* Para quem repete as mesmas tarefas todo dia, registrar vira dois
-   cliques. A lista sai do histórico da pessoa — nada a configurar. */
+   cliques. A lista sai do histórico da pessoa — nada a configurar.
+   São três, e não cinco: passando disso o atalho ocupa mais tela que o
+   próprio campo de busca, e a quinta atividade mais repetida já não é
+   repetida o bastante para valer um botão fixo. */
+const MAX_FREQUENTES = 3;
 function montarFrequentes() {
   const meus = dados.registros.filter(r => r.servidor === ident?.nome);
   const contagem = new Map();
   for (const r of meus) contagem.set(r.atividade, (contagem.get(r.atividade) || 0) + 1);
+  /* Descarta as saídas do catálogo ANTES de cortar: cortando primeiro, uma
+     atividade que saiu do catálogo levava embora uma das vagas. */
   const top = [...contagem.entries()]
     .sort((x, y) => y[1] - x[1])
-    .slice(0, 5)
     .map(([texto, n]) => ({ a: ATIVIDADES.find(x => x.t === texto), n }))
-    .filter(x => x.a);   // ignora atividades saídas do catálogo
+    .filter(x => x.a)
+    .slice(0, MAX_FREQUENTES);
   $("campoFrequentes").hidden = top.length === 0;
   /* O macroprocesso vem ANTES da atividade: é ele que situa a tarefa, e
      lido depois virava rodapé de uma frase já encerrada. */

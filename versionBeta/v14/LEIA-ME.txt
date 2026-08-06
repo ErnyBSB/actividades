@@ -96,6 +96,18 @@ letra pequena e maiúscula, como as demais etiquetas do aplicativo. A
 contagem de registros continua embaixo, que é onde ela pertence: é
 detalhe, não é identificação.
 
+Esses botões passaram de cinco para TRÊS (a seção "Busca de atividades",
+mais abaixo, descreve os cinco de antes). Cinco atalhos ocupavam mais
+tela que o próprio campo de busca, que é o caminho de quem NÃO está
+repetindo tarefa; e a quinta atividade mais registrada, na prática, já
+não se repete o bastante para merecer um botão fixo. Quem precisa dela
+continua achando pela busca, que não mudou.
+
+Junto disso, a lista passou a descartar as atividades saídas do catálogo
+ANTES de cortar em três, e não depois. Cortando primeiro, uma atividade
+que tivesse saído do catalogo.js levava embora uma das vagas e o atalho
+aparecia com dois botões — ou nenhum — sem motivo visível na tela.
+
 MEU MÊS — a meta em tamanho grande, com a explicação do que ela mede
 LOGO ABAIXO do número, e não escondida numa dica: "média dos dias em que
 você lançou; dias sem lançamento e de ausência ficam fora do cálculo —
