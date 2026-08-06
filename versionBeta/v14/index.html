@@ -1496,7 +1496,13 @@ const ATIVIDADES = PROCESSOS.flatMap((p, pi) =>
     n: normalizar(a.t + " " + p.nome),
     st: [...new Set(palavras(a.t + " " + p.nome).map(radical))]
   }))
-);
+).sort((x, y) => x.t.localeCompare(y.t, "pt-BR", { sensitivity: "base" }));
+/* Ordem alfabética, e não a do catalogo.js: a lista é percorrida com o
+   olho, e a ordem em que alguém digitou as atividades no arquivo não
+   diz nada a quem lê. localeCompare em pt-BR põe "ação" junto de "acao"
+   e o "ç" no lugar do "c" — ordenar pelo código do caractere jogaria
+   todos os acentuados para o fim da lista. Os campos pi/ai continuam
+   apontando para o catálogo, então o filtro por processo não muda. */
 /* REGRA DA CASA: todo texto que vier de fora do código-fonte — arquivo de
    outra pessoa na rede, config.json, catalogo.js — passa por aqui antes
    de entrar em innerHTML, inclusive dentro de atributos. Sem isto, uma

@@ -108,6 +108,23 @@ ANTES de cortar em três, e não depois. Cortando primeiro, uma atividade
 que tivesse saído do catalogo.js levava embora uma das vagas e o atalho
 aparecia com dois botões — ou nenhum — sem motivo visível na tela.
 
+A lista do campo "Digite parte da atividade" saiu da ordem do catálogo e
+passou a ser ALFABÉTICA. A ordem antiga era a ordem em que as atividades
+foram digitadas no catalogo.js, agrupadas por processo: ela fazia sentido
+para quem edita o arquivo e nenhum para quem lê a lista na tela. Quem
+digita uma palavra continua vendo o resultado da busca; a ordem importa
+para quem abre o campo sem saber ainda o que procura e percorre as 72
+atividades com o olho.
+
+A comparação é feita em português (localeCompare em pt-BR), não pelo
+código do caractere: assim "ação" fica junto de "acao" e o "ç" cai no
+lugar do "c". Ordenando por código, tudo que tem acento iria parar no
+fim da lista, depois do "z".
+
+O filtro opcional por processo não mudou: cada atividade continua sabendo
+de que processo veio. O que ficou de fora é a ordem do próprio seletor de
+processos, que segue a do catálogo — a issue pedia a lista de atividades.
+
 MEU MÊS — a meta em tamanho grande, com a explicação do que ela mede
 LOGO ABAIXO do número, e não escondida numa dica: "média dos dias em que
 você lançou; dias sem lançamento e de ausência ficam fora do cálculo —
