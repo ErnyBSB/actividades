@@ -52,7 +52,11 @@ button{font-family:inherit}
 .rail{flex:0 0 244px; background:var(--rail); color:var(--rail-texto);
   display:flex; flex-direction:column; position:sticky; top:0; height:100vh}
 .rail-topo{padding:22px 20px 18px; border-bottom:1px solid var(--rail-linha)}
-.marca{font-family:var(--serif); font-size:26px; line-height:1; color:#F9FBF9}
+/* O nome é o do programa, por extenso. Em duas linhas dentro dos 244px do
+   rail: o espaço entre "Programa" e "de" é inseparável no HTML, para a
+   quebra cair sempre antes de "Resultados" e nunca deixar o "de" sozinho. */
+.marca{display:block; font-family:var(--serif); font-size:23px; line-height:1.1;
+  color:#F9FBF9}
 .marca-sub{display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap}
 .marca-sub .org{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--rail-mudo)}
 .marca-sub .versao{font-size:10.5px; letter-spacing:.04em; color:var(--rail-mudo);
@@ -290,6 +294,8 @@ tr.pendente td{background:#FEFBF6}
   color:var(--tinta); line-height:1.4}
 .freq:hover{border-color:var(--verde); background:var(--verde-suave)}
 .freq small{display:block; color:var(--grafite); font-size:11px; margin-top:2px}
+.freq .proc{font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  font-weight:600; margin:0 0 3px}
 
 /* ---------- visão gerencial ---------- */
 .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px}
@@ -387,7 +393,7 @@ dialog h2{font-family:var(--serif); font-weight:400; font-size:21px; margin:0 0 
      não fiscaliza nada não vê o segundo grupo. -->
 <nav class="rail">
   <div class="rail-topo">
-    <span class="marca">Resultados</span>
+    <span class="marca">Programa&nbsp;de Resultados</span>
     <div class="marca-sub">
       <span class="org">COBIB</span>
       <span class="versao">versão beta 14 (ago/26)</span>
@@ -1494,7 +1500,13 @@ const ATIVIDADES = PROCESSOS.flatMap((p, pi) =>
     n: normalizar(a.t + " " + p.nome),
     st: [...new Set(palavras(a.t + " " + p.nome).map(radical))]
   }))
-);
+).sort((x, y) => x.t.localeCompare(y.t, "pt-BR", { sensitivity: "base" }));
+/* Ordem alfabética, e não a do catalogo.js: a lista é percorrida com o
+   olho, e a ordem em que alguém digitou as atividades no arquivo não
+   diz nada a quem lê. localeCompare em pt-BR põe "ação" junto de "acao"
+   e o "ç" no lugar do "c" — ordenar pelo código do caractere jogaria
+   todos os acentuados para o fim da lista. Os campos pi/ai continuam
+   apontando para o catálogo, então o filtro por processo não muda. */
 /* REGRA DA CASA: todo texto que vier de fora do código-fonte — arquivo de
    outra pessoa na rede, config.json, catalogo.js — passa por aqui antes
    de entrar em innerHTML, inclusive dentro de atributos. Sem isto, uma
@@ -1657,21 +1669,30 @@ $("selProcesso").addEventListener("change", () => abrirLista(true));
 
 /* ---- Atividades frequentes: derivadas dos próprios lançamentos ---- */
 /* Para quem repete as mesmas tarefas todo dia, registrar vira dois
-   cliques. A lista sai do histórico da pessoa — nada a configurar. */
+   cliques. A lista sai do histórico da pessoa — nada a configurar.
+   São três, e não cinco: passando disso o atalho ocupa mais tela que o
+   próprio campo de busca, e a quinta atividade mais repetida já não é
+   repetida o bastante para valer um botão fixo. */
+const MAX_FREQUENTES = 3;
 function montarFrequentes() {
   const meus = dados.registros.filter(r => r.servidor === ident?.nome);
   const contagem = new Map();
   for (const r of meus) contagem.set(r.atividade, (contagem.get(r.atividade) || 0) + 1);
+  /* Descarta as saídas do catálogo ANTES de cortar: cortando primeiro, uma
+     atividade que saiu do catálogo levava embora uma das vagas. */
   const top = [...contagem.entries()]
     .sort((x, y) => y[1] - x[1])
-    .slice(0, 5)
     .map(([texto, n]) => ({ a: ATIVIDADES.find(x => x.t === texto), n }))
-    .filter(x => x.a);   // ignora atividades saídas do catálogo
+    .filter(x => x.a)
+    .slice(0, MAX_FREQUENTES);
   $("campoFrequentes").hidden = top.length === 0;
+  /* O macroprocesso vem ANTES da atividade: é ele que situa a tarefa, e
+     lido depois virava rodapé de uma frase já encerrada. */
   $("frequentes").innerHTML = top.map(({ a, n }, i) => `
     <button type="button" class="freq" data-i="${i}" title="${escapar(a.t)}">
+      <small class="proc">${escapar(a.proc)}</small>
       ${escapar(a.t.length > 68 ? a.t.slice(0, 68).trim() + "…" : a.t)}
-      <small>${escapar(a.proc)} · ${n} ${n === 1 ? "registro" : "registros"}</small>
+      <small>${n} ${n === 1 ? "registro" : "registros"}</small>
     </button>`).join("");
   $("frequentes").dataset.mapa = JSON.stringify(top.map(x => ATIVIDADES.indexOf(x.a)));
 }
