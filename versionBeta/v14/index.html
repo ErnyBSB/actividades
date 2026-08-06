@@ -290,6 +290,8 @@ tr.pendente td{background:#FEFBF6}
   color:var(--tinta); line-height:1.4}
 .freq:hover{border-color:var(--verde); background:var(--verde-suave)}
 .freq small{display:block; color:var(--grafite); font-size:11px; margin-top:2px}
+.freq .proc{font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  font-weight:600; margin:0 0 3px}
 
 /* ---------- visão gerencial ---------- */
 .kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px}
@@ -1668,10 +1670,13 @@ function montarFrequentes() {
     .map(([texto, n]) => ({ a: ATIVIDADES.find(x => x.t === texto), n }))
     .filter(x => x.a);   // ignora atividades saídas do catálogo
   $("campoFrequentes").hidden = top.length === 0;
+  /* O macroprocesso vem ANTES da atividade: é ele que situa a tarefa, e
+     lido depois virava rodapé de uma frase já encerrada. */
   $("frequentes").innerHTML = top.map(({ a, n }, i) => `
     <button type="button" class="freq" data-i="${i}" title="${escapar(a.t)}">
+      <small class="proc">${escapar(a.proc)}</small>
       ${escapar(a.t.length > 68 ? a.t.slice(0, 68).trim() + "…" : a.t)}
-      <small>${escapar(a.proc)} · ${n} ${n === 1 ? "registro" : "registros"}</small>
+      <small>${n} ${n === 1 ? "registro" : "registros"}</small>
     </button>`).join("");
   $("frequentes").dataset.mapa = JSON.stringify(top.map(x => ATIVIDADES.indexOf(x.a)));
 }

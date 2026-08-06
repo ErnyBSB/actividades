@@ -86,6 +86,16 @@ Abaixo do botão aparece o arquivo em que aquilo vai ser gravado
 (SEORE/lancamentos/fulano.json). Num aplicativo sem servidor, saber
 onde o dado cai é parte de entender o sistema.
 
+Nos botões de "Suas mais registradas", o macroprocesso passou para CIMA
+da atividade. Antes ele vinha no rodapé do botão, junto da contagem de
+registros: quem lia já tinha terminado a frase da atividade quando
+descobria a que macroprocesso ela pertencia. É o macroprocesso que situa
+a tarefa — "Desenvolver acervo bibliográfico e digital" antes de
+"catalogação de material bibliográfico" —, então ele vem primeiro, em
+letra pequena e maiúscula, como as demais etiquetas do aplicativo. A
+contagem de registros continua embaixo, que é onde ela pertence: é
+detalhe, não é identificação.
+
 MEU MÊS — a meta em tamanho grande, com a explicação do que ela mede
 LOGO ABAIXO do número, e não escondida numa dica: "média dos dias em que
 você lançou; dias sem lançamento e de ausência ficam fora do cálculo —
